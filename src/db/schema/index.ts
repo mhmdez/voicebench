@@ -1,12 +1,8 @@
 /**
  * Database Schema Barrel Export
  *
- * Add your Drizzle schema definitions here.
- * Example:
- *   export * from "./users";
- *   export * from "./sessions";
+ * All Drizzle schema definitions are exported from here.
  */
 
-// Placeholder export to make this a valid module
-// Schema tables will be exported here as they are created
-export {};
+export * from './providers';
+export * from './ratings';
