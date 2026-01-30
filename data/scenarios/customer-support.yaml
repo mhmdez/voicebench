@@ -1,0 +1,97 @@
+# Customer Support Basics
+# 10 scenarios for testing customer support voice AI capabilities
+
+name: Customer Support Basics
+description: Common customer support scenarios for testing voice AI in service contexts
+version: "1.0"
+
+scenarios:
+  - id: cs-yaml-001
+    name: Order Status Inquiry
+    type: task-completion
+    prompt: "I placed an order three days ago and haven't received any shipping confirmation. Can you check the status of order number 12345?"
+    expectedOutcome: Acknowledges the order number, provides status information or explains how to track, shows empathy for the wait
+    tags: [order-tracking, e-commerce, inquiry]
+    language: en
+    difficulty: easy
+
+  - id: cs-yaml-002
+    name: Return Request
+    type: task-completion
+    prompt: "I'd like to return a pair of shoes I bought last week. They don't fit properly."
+    expectedOutcome: Initiates return process, asks for necessary information, explains return policy and next steps
+    tags: [returns, e-commerce, process]
+    language: en
+    difficulty: easy
+
+  - id: cs-yaml-003
+    name: Billing Dispute
+    type: task-completion
+    prompt: "I was charged $49.99 but the price on the website said $39.99. I want a refund for the difference."
+    expectedOutcome: Acknowledges the pricing concern, offers to investigate, proposes resolution (refund or store credit)
+    tags: [billing, dispute, pricing]
+    language: en
+    difficulty: medium
+
+  - id: cs-yaml-004
+    name: Technical Support
+    type: information-retrieval
+    prompt: "My app keeps crashing every time I try to open it. I've already tried restarting my phone."
+    expectedOutcome: Asks clarifying questions (device, OS version), provides troubleshooting steps beyond restart
+    tags: [technical, app, troubleshooting]
+    language: en
+    difficulty: medium
+
+  - id: cs-yaml-005
+    name: Subscription Cancellation
+    type: task-completion
+    prompt: "I want to cancel my subscription. I'm not using it enough to justify the cost."
+    expectedOutcome: Acknowledges request, may offer alternatives or retention offers, explains cancellation process
+    tags: [subscription, cancellation, retention]
+    language: en
+    difficulty: medium
+
+  - id: cs-yaml-006
+    name: Complaint Escalation
+    type: conversation-flow
+    prompt: "This is the third time I've called about this issue. I'm very frustrated and I want to speak to a supervisor."
+    expectedOutcome: Shows empathy, apologizes for inconvenience, either escalates or offers immediate resolution
+    tags: [escalation, complaint, frustrated-customer]
+    language: en
+    difficulty: hard
+
+  - id: cs-yaml-007
+    name: Product Information
+    type: information-retrieval
+    prompt: "Can you tell me the difference between your basic and premium plans? I'm trying to decide which one to get."
+    expectedOutcome: Clearly explains the differences, highlights key features, may ask about use case to recommend
+    tags: [product-info, plans, comparison]
+    language: en
+    difficulty: easy
+
+  - id: cs-yaml-008
+    name: Appointment Scheduling
+    type: task-completion
+    prompt: "I need to schedule a service appointment for my dishwasher. It's making a strange noise."
+    expectedOutcome: Collects necessary information, offers available time slots, confirms appointment details
+    tags: [scheduling, appointment, service]
+    language: en
+    difficulty: medium
+
+  - id: cs-yaml-009
+    name: Account Security
+    type: task-completion
+    prompt: "I think someone has accessed my account without permission. I noticed charges I didn't make."
+    expectedOutcome: Takes security seriously, initiates account security protocols, advises on next steps
+    tags: [security, fraud, account]
+    language: en
+    difficulty: hard
+
+  - id: cs-yaml-010
+    name: Feedback Collection
+    type: conversation-flow
+    prompt: "I had a really great experience with your delivery team today. The driver was so helpful."
+    expectedOutcome: Accepts positive feedback graciously, offers to pass along compliment, may ask for specific details
+    tags: [feedback, positive, compliment]
+    language: en
+    difficulty: easy

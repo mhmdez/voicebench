@@ -1,0 +1,142 @@
+# General Knowledge
+# 15 scenarios for testing general knowledge and information retrieval
+
+name: General Knowledge
+description: General knowledge scenarios covering science, history, geography, and everyday topics
+version: "1.0"
+
+scenarios:
+  - id: gk-yaml-001
+    name: Geography Basic
+    type: information-retrieval
+    prompt: "What is the largest country in the world by area?"
+    expectedOutcome: Returns Russia with approximate area (17.1 million km²)
+    tags: [geography, facts, countries]
+    language: en
+    difficulty: easy
+
+  - id: gk-yaml-002
+    name: Science Basic
+    type: information-retrieval
+    prompt: "How many planets are in our solar system?"
+    expectedOutcome: Returns 8 planets, may mention Pluto's reclassification
+    tags: [science, astronomy, facts]
+    language: en
+    difficulty: easy
+
+  - id: gk-yaml-003
+    name: History Basic
+    type: information-retrieval
+    prompt: "Who was the first President of the United States?"
+    expectedOutcome: Returns George Washington
+    tags: [history, politics, USA]
+    language: en
+    difficulty: easy
+
+  - id: gk-yaml-004
+    name: Mathematics
+    type: task-completion
+    prompt: "What is the square root of 144?"
+    expectedOutcome: Returns 12
+    tags: [math, calculation, basic]
+    language: en
+    difficulty: easy
+
+  - id: gk-yaml-005
+    name: Biology Concept
+    type: information-retrieval
+    prompt: "What organ in the human body produces insulin?"
+    expectedOutcome: Returns the pancreas
+    tags: [biology, anatomy, health]
+    language: en
+    difficulty: easy
+
+  - id: gk-yaml-006
+    name: Literature
+    type: information-retrieval
+    prompt: "Who wrote Romeo and Juliet?"
+    expectedOutcome: Returns William Shakespeare
+    tags: [literature, authors, classics]
+    language: en
+    difficulty: easy
+
+  - id: gk-yaml-007
+    name: Technology Explanation
+    type: information-retrieval
+    prompt: "What does CPU stand for and what does it do?"
+    expectedOutcome: Central Processing Unit - explains it's the main processor that executes instructions
+    tags: [technology, computers, explanation]
+    language: en
+    difficulty: medium
+
+  - id: gk-yaml-008
+    name: Historical Event
+    type: information-retrieval
+    prompt: "What was the significance of the Industrial Revolution?"
+    expectedOutcome: Explains transition from agrarian to industrial society, technological innovations, social changes
+    tags: [history, economics, significance]
+    language: en
+    difficulty: medium
+
+  - id: gk-yaml-009
+    name: Scientific Process
+    type: information-retrieval
+    prompt: "How do plants make their own food?"
+    expectedOutcome: Explains photosynthesis - sunlight, water, carbon dioxide converted to glucose and oxygen
+    tags: [biology, plants, process]
+    language: en
+    difficulty: medium
+
+  - id: gk-yaml-010
+    name: Cultural Knowledge
+    type: information-retrieval
+    prompt: "What is the significance of the Mona Lisa?"
+    expectedOutcome: Explains it's a famous painting by Leonardo da Vinci, its artistic importance and mystery
+    tags: [art, culture, history]
+    language: en
+    difficulty: medium
+
+  - id: gk-yaml-011
+    name: Economics Concept
+    type: information-retrieval
+    prompt: "What is the difference between a recession and a depression?"
+    expectedOutcome: Explains both as economic downturns, with depression being longer and more severe
+    tags: [economics, comparison, definitions]
+    language: en
+    difficulty: medium
+
+  - id: gk-yaml-012
+    name: Physics Concept
+    type: information-retrieval
+    prompt: "Why does the sky appear blue during the day?"
+    expectedOutcome: Explains Rayleigh scattering - shorter blue wavelengths scatter more in atmosphere
+    tags: [physics, light, explanation]
+    language: en
+    difficulty: medium
+
+  - id: gk-yaml-013
+    name: Complex History
+    type: information-retrieval
+    prompt: "What were the main factors that led to the fall of the Roman Empire?"
+    expectedOutcome: Discusses multiple factors - military, economic, political, and external pressures
+    tags: [history, analysis, complex]
+    language: en
+    difficulty: hard
+
+  - id: gk-yaml-014
+    name: Philosophy
+    type: information-retrieval
+    prompt: "What is the trolley problem and why is it important in ethics?"
+    expectedOutcome: Explains the thought experiment and its relevance to utilitarian vs deontological ethics
+    tags: [philosophy, ethics, thought-experiment]
+    language: en
+    difficulty: hard
+
+  - id: gk-yaml-015
+    name: Interdisciplinary
+    type: information-retrieval
+    prompt: "How has the internet changed the way humans communicate and form relationships?"
+    expectedOutcome: Comprehensive answer covering social media, instant communication, global connectivity, and challenges
+    tags: [technology, sociology, analysis]
+    language: en
+    difficulty: hard

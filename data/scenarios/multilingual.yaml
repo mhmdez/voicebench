@@ -1,0 +1,193 @@
+# Multilingual Test
+# 20 scenarios for testing multilingual voice AI capabilities
+
+name: Multilingual Test
+description: Scenarios in multiple languages to test multilingual voice AI capabilities
+version: "1.0"
+
+scenarios:
+  # Spanish (4 scenarios)
+  - id: ml-yaml-001
+    name: Spanish Greeting
+    type: conversation-flow
+    prompt: "¡Hola! ¿Cómo te llamas?"
+    expectedOutcome: Responds appropriately in Spanish, introduces itself
+    tags: [spanish, greeting, introduction]
+    language: es
+    difficulty: easy
+
+  - id: ml-yaml-002
+    name: Spanish Information
+    type: information-retrieval
+    prompt: "¿Cuál es la capital de España?"
+    expectedOutcome: Returns Madrid in Spanish
+    tags: [spanish, geography, facts]
+    language: es
+    difficulty: easy
+
+  - id: ml-yaml-003
+    name: Spanish Task
+    type: task-completion
+    prompt: "¿Puedes convertir 100 dólares a euros?"
+    expectedOutcome: Provides currency conversion with current or approximate rate in Spanish
+    tags: [spanish, conversion, currency]
+    language: es
+    difficulty: medium
+
+  - id: ml-yaml-004
+    name: Spanish Complex
+    type: information-retrieval
+    prompt: "Explícame la diferencia entre ser y estar en español."
+    expectedOutcome: Explains the grammatical difference between ser and estar in Spanish
+    tags: [spanish, grammar, explanation]
+    language: es
+    difficulty: hard
+
+  # French (4 scenarios)
+  - id: ml-yaml-005
+    name: French Greeting
+    type: conversation-flow
+    prompt: "Bonjour! Comment allez-vous aujourd'hui?"
+    expectedOutcome: Responds appropriately in French with greeting
+    tags: [french, greeting, social]
+    language: fr
+    difficulty: easy
+
+  - id: ml-yaml-006
+    name: French Information
+    type: information-retrieval
+    prompt: "Quelle est la plus haute montagne du monde?"
+    expectedOutcome: Returns Mount Everest (Mont Everest) in French
+    tags: [french, geography, facts]
+    language: fr
+    difficulty: easy
+
+  - id: ml-yaml-007
+    name: French Task
+    type: task-completion
+    prompt: "Peux-tu me donner une recette simple pour une omelette?"
+    expectedOutcome: Provides simple omelet recipe in French
+    tags: [french, cooking, recipe]
+    language: fr
+    difficulty: medium
+
+  - id: ml-yaml-008
+    name: French Complex
+    type: information-retrieval
+    prompt: "Quels sont les principaux événements de la Révolution française?"
+    expectedOutcome: Explains key events of the French Revolution in French
+    tags: [french, history, complex]
+    language: fr
+    difficulty: hard
+
+  # German (4 scenarios)
+  - id: ml-yaml-009
+    name: German Greeting
+    type: conversation-flow
+    prompt: "Guten Tag! Wie kann ich Ihnen helfen?"
+    expectedOutcome: Responds appropriately in German, ready to help
+    tags: [german, greeting, service]
+    language: de
+    difficulty: easy
+
+  - id: ml-yaml-010
+    name: German Information
+    type: information-retrieval
+    prompt: "Wie viele Bundesländer hat Deutschland?"
+    expectedOutcome: Returns 16 federal states (Bundesländer) in German
+    tags: [german, geography, facts]
+    language: de
+    difficulty: easy
+
+  - id: ml-yaml-011
+    name: German Task
+    type: task-completion
+    prompt: "Kannst du mir helfen, einen Brief auf Deutsch zu schreiben?"
+    expectedOutcome: Offers to help write a letter, asks what kind of letter in German
+    tags: [german, writing, task]
+    language: de
+    difficulty: medium
+
+  - id: ml-yaml-012
+    name: German Complex
+    type: information-retrieval
+    prompt: "Erkläre mir das deutsche Gesundheitssystem."
+    expectedOutcome: Explains the German healthcare system in German
+    tags: [german, healthcare, complex]
+    language: de
+    difficulty: hard
+
+  # Arabic (4 scenarios)
+  - id: ml-yaml-013
+    name: Arabic Greeting
+    type: conversation-flow
+    prompt: "السلام عليكم، كيف حالك؟"
+    expectedOutcome: Responds with appropriate Arabic greeting (وعليكم السلام)
+    tags: [arabic, greeting, social]
+    language: ar
+    difficulty: easy
+
+  - id: ml-yaml-014
+    name: Arabic Information
+    type: information-retrieval
+    prompt: "ما هي عاصمة المملكة العربية السعودية؟"
+    expectedOutcome: Returns Riyadh (الرياض) in Arabic
+    tags: [arabic, geography, facts]
+    language: ar
+    difficulty: easy
+
+  - id: ml-yaml-015
+    name: Arabic Task
+    type: task-completion
+    prompt: "أريد أن أتعلم اللغة العربية. من أين أبدأ؟"
+    expectedOutcome: Provides language learning advice in Arabic
+    tags: [arabic, learning, advice]
+    language: ar
+    difficulty: medium
+
+  - id: ml-yaml-016
+    name: Arabic Complex
+    type: information-retrieval
+    prompt: "اشرح لي تاريخ الخط العربي وتطوره."
+    expectedOutcome: Explains the history and evolution of Arabic calligraphy in Arabic
+    tags: [arabic, history, art, complex]
+    language: ar
+    difficulty: hard
+
+  # Japanese (2 scenarios)
+  - id: ml-yaml-017
+    name: Japanese Greeting
+    type: conversation-flow
+    prompt: "こんにちは！お元気ですか？"
+    expectedOutcome: Responds with appropriate Japanese greeting
+    tags: [japanese, greeting, social]
+    language: ja
+    difficulty: easy
+
+  - id: ml-yaml-018
+    name: Japanese Information
+    type: information-retrieval
+    prompt: "日本で一番高い山は何ですか？"
+    expectedOutcome: Returns Mount Fuji (富士山) in Japanese
+    tags: [japanese, geography, facts]
+    language: ja
+    difficulty: easy
+
+  # Chinese (2 scenarios)
+  - id: ml-yaml-019
+    name: Chinese Greeting
+    type: conversation-flow
+    prompt: "你好！最近怎么样？"
+    expectedOutcome: Responds with appropriate Chinese greeting
+    tags: [chinese, greeting, social]
+    language: zh
+    difficulty: easy
+
+  - id: ml-yaml-020
+    name: Chinese Information
+    type: information-retrieval
+    prompt: "中国有多少个省份？"
+    expectedOutcome: Returns 23 provinces in Chinese (may mention special administrative regions)
+    tags: [chinese, geography, facts]
+    language: zh
+    difficulty: medium
