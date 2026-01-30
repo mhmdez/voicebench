@@ -37,3 +37,5 @@ export * from './scenario-schema';
 export * from './scenario-parser';
 export * from './judge-prompts';
 export * from './judge-service';
+export * from './metrics-collector';
+export * from './eval-engine';
