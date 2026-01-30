@@ -7,4 +7,6 @@
  *   export * from "./sessions";
  */
 
+// Placeholder export to make this a valid module
 // Schema tables will be exported here as they are created
+export {};
