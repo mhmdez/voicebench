@@ -12,3 +12,8 @@ export * from "./ratings";
 export * from "./prompts";
 export * from "./matches";
 export * from "./votes";
+
+// Eval schemas (Scenarios, Runs, Results)
+export * from "./scenarios";
+export * from "./eval-runs";
+export * from "./eval-results";

@@ -15,6 +15,13 @@
       "when": 1769740533908,
       "tag": "0001_smooth_raza",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769740606063,
+      "tag": "0002_cool_sally_floyd",
+      "breakpoints": true
     }
   ]
 }
