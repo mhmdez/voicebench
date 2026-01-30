@@ -1,8 +1,14 @@
 /**
  * Database Schema Barrel Export
  *
- * All Drizzle schema definitions are exported from here.
+ * Exports all Drizzle schema definitions.
  */
 
-export * from './providers';
-export * from './ratings';
+// Core schemas (Providers & Ratings)
+export * from "./providers";
+export * from "./ratings";
+
+// Arena schemas (Prompts, Matches, Votes)
+export * from "./prompts";
+export * from "./matches";
+export * from "./votes";
