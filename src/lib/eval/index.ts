@@ -31,3 +31,9 @@ export {
   type DetailedWERResult,
   type AlignmentPair,
 } from './wer-calculator';
+
+// Re-export other eval modules
+export * from './scenario-schema';
+export * from './scenario-parser';
+export * from './judge-prompts';
+export * from './judge-service';
