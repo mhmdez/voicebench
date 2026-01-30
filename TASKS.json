@@ -1,0 +1,959 @@
+{
+  "project": "VoiceBench v2",
+  "version": "1.0",
+  "createdAt": "2025-01-27",
+  "totalTasks": 38,
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Initialize Next.js project with TypeScript",
+      "description": "Create a new Next.js 14+ project using App Router with TypeScript configuration. Set up the base folder structure following Next.js conventions.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": [],
+      "deliverables": [
+        "package.json - Next.js, React, TypeScript dependencies",
+        "tsconfig.json - TypeScript configuration with path aliases",
+        "next.config.js - Next.js configuration",
+        "src/app/layout.tsx - Root layout",
+        "src/app/page.tsx - Home page placeholder"
+      ],
+      "acceptanceCriteria": [
+        "npm run dev starts the development server",
+        "TypeScript strict mode enabled",
+        "Path alias @ configured for src directory",
+        "App Router structure in place"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-002",
+      "title": "Configure Tailwind CSS and shadcn/ui",
+      "description": "Install and configure Tailwind CSS with the shadcn/ui component library. Set up the design system foundation including colors, typography, and spacing.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-001"],
+      "deliverables": [
+        "tailwind.config.ts - Tailwind configuration with custom theme",
+        "src/app/globals.css - Global styles with Tailwind directives",
+        "components.json - shadcn/ui configuration",
+        "src/components/ui/ - shadcn/ui base components directory",
+        "src/lib/utils.ts - cn() utility function"
+      ],
+      "acceptanceCriteria": [
+        "Tailwind classes work in components",
+        "shadcn/ui CLI can add components (npx shadcn-ui@latest add button)",
+        "Dark mode support configured",
+        "CSS variables for theming in globals.css"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-003",
+      "title": "Install core shadcn/ui components",
+      "description": "Add all required shadcn/ui components specified in the design system: Button, Card, Table, Tabs, Dialog, Select, Input, Toast, Progress, Badge, Skeleton, Accordion, Dropdown Menu, Command, Form, Label, Checkbox, Radio Group.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-002"],
+      "deliverables": [
+        "src/components/ui/button.tsx",
+        "src/components/ui/card.tsx",
+        "src/components/ui/table.tsx",
+        "src/components/ui/tabs.tsx",
+        "src/components/ui/dialog.tsx",
+        "src/components/ui/select.tsx",
+        "src/components/ui/input.tsx",
+        "src/components/ui/toast.tsx + toaster.tsx + use-toast.ts",
+        "src/components/ui/progress.tsx",
+        "src/components/ui/badge.tsx",
+        "src/components/ui/skeleton.tsx",
+        "src/components/ui/accordion.tsx",
+        "src/components/ui/dropdown-menu.tsx",
+        "src/components/ui/command.tsx",
+        "src/components/ui/form.tsx",
+        "src/components/ui/label.tsx",
+        "src/components/ui/checkbox.tsx",
+        "src/components/ui/radio-group.tsx"
+      ],
+      "acceptanceCriteria": [
+        "All 18 components installed and importable",
+        "Components render without errors",
+        "Toaster provider added to root layout"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-004",
+      "title": "Set up Drizzle ORM with SQLite",
+      "description": "Configure Drizzle ORM with better-sqlite3 for local development. Set up the database connection, configuration, and migration tooling.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-001"],
+      "deliverables": [
+        "drizzle.config.ts - Drizzle configuration",
+        "src/db/index.ts - Database connection and client export",
+        "src/db/schema/index.ts - Schema barrel export",
+        ".env.local - DATABASE_URL for SQLite path",
+        "package.json scripts - db:generate, db:migrate, db:studio"
+      ],
+      "acceptanceCriteria": [
+        "drizzle-kit generate creates migration files",
+        "drizzle-kit migrate applies migrations",
+        "drizzle-kit studio launches database GUI",
+        "Database file created in project root or data/ folder"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-005",
+      "title": "Define database schema - Providers and Ratings",
+      "description": "Create Drizzle schema definitions for Provider and Rating tables as specified in the data models section.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-004"],
+      "deliverables": [
+        "src/db/schema/providers.ts - Provider table schema",
+        "src/db/schema/ratings.ts - Rating table schema",
+        "src/types/provider.ts - TypeScript interfaces for Provider, ProviderConfig, ProviderType",
+        "src/types/rating.ts - TypeScript interface for Rating"
+      ],
+      "acceptanceCriteria": [
+        "Provider table has: id, name, type, config (JSON), isActive, createdAt, updatedAt",
+        "Rating table has: id, providerId (FK), category, elo, matchCount, winCount, tieCount, updatedAt",
+        "Proper indexes on foreign keys",
+        "TypeScript types match Drizzle schema"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-006",
+      "title": "Define database schema - Arena (Prompts, Matches, Votes)",
+      "description": "Create Drizzle schema definitions for Prompt, Match, and Vote tables to support the Arena functionality.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-004"],
+      "deliverables": [
+        "src/db/schema/prompts.ts - Prompt table schema",
+        "src/db/schema/matches.ts - Match table schema",
+        "src/db/schema/votes.ts - Vote table schema",
+        "src/types/prompt.ts - TypeScript interface for Prompt, Category type",
+        "src/types/match.ts - TypeScript interface for Match",
+        "src/types/vote.ts - TypeScript interface for Vote"
+      ],
+      "acceptanceCriteria": [
+        "Prompt table has: id, category, text, audioUrl, language, isActive, createdAt",
+        "Match table has: id, promptId (FK), category, providerAId, providerBId, responseAUrl, responseBUrl, responseALatency, responseBLatency, createdAt, votedAt, status",
+        "Vote table has: id, matchId (FK), winner, sessionId, createdAt",
+        "Category enum type defined: general, customer-support, information-retrieval, creative, multilingual"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-007",
+      "title": "Define database schema - Eval (Scenarios, Runs, Results)",
+      "description": "Create Drizzle schema definitions for Scenario, EvalRun, and EvalResult tables to support the Eval functionality.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-004"],
+      "deliverables": [
+        "src/db/schema/scenarios.ts - Scenario table schema",
+        "src/db/schema/eval-runs.ts - EvalRun table schema",
+        "src/db/schema/eval-results.ts - EvalResult table schema",
+        "src/types/scenario.ts - TypeScript interface for Scenario, ScenarioType",
+        "src/types/eval-run.ts - TypeScript interface for EvalRun",
+        "src/types/eval-result.ts - TypeScript interface for EvalResult"
+      ],
+      "acceptanceCriteria": [
+        "Scenario table has: id, name, type, prompt, promptAudioUrl, expectedOutcome, tags (JSON array), language, difficulty, createdAt",
+        "EvalRun table has: id, name, providerIds (JSON), scenarioIds (JSON), status, progress, startedAt, completedAt, createdAt",
+        "EvalResult table has all metrics: ttfb, totalResponseTime, wer, accuracyScore, helpfulnessScore, naturalnessScore, efficiencyScore, judgeReasoning, taskCompleted",
+        "ScenarioType enum: task-completion, information-retrieval, conversation-flow"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-008",
+      "title": "Run initial database migration",
+      "description": "Generate and apply the initial database migration with all schema tables. Verify the database structure is correct.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-005", "TASK-006", "TASK-007"],
+      "deliverables": [
+        "drizzle/migrations/0000_*.sql - Initial migration file",
+        "drizzle/meta/_journal.json - Migration journal"
+      ],
+      "acceptanceCriteria": [
+        "Migration generates without errors",
+        "Migration applies successfully",
+        "All tables visible in drizzle-kit studio",
+        "Foreign key relationships work correctly"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-009",
+      "title": "Create Zustand stores",
+      "description": "Set up Zustand state management with three stores: arenaStore, evalStore, and settingsStore as specified in the architecture.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-001"],
+      "deliverables": [
+        "src/stores/arena-store.ts - Arena state (currentMatch, category, votingState)",
+        "src/stores/eval-store.ts - Eval state (currentRun, scenarios, results)",
+        "src/stores/settings-store.ts - Settings state (providers, global config)",
+        "src/stores/index.ts - Barrel export"
+      ],
+      "acceptanceCriteria": [
+        "Stores are typed with TypeScript",
+        "Stores include actions for state mutations",
+        "Devtools middleware enabled in development",
+        "Persist middleware for settings store (localStorage)"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-010",
+      "title": "Create Provider adapter interface",
+      "description": "Define the abstract interface for provider adapters that all voice AI providers must implement. This enables the adapter pattern for swappable providers.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-005"],
+      "deliverables": [
+        "src/lib/providers/base-adapter.ts - Abstract ProviderAdapter class/interface",
+        "src/lib/providers/types.ts - Shared types (ProviderResponse, ProviderHealthCheck, etc.)",
+        "src/lib/providers/index.ts - Barrel export and adapter registry"
+      ],
+      "acceptanceCriteria": [
+        "Interface defines: generateResponse(prompt: AudioPrompt): Promise<ProviderResponse>",
+        "Interface defines: healthCheck(): Promise<ProviderHealthCheck>",
+        "Interface defines: getName(): string, getType(): ProviderType",
+        "ProviderResponse includes: audioBuffer, latency (ttfb, total), metadata",
+        "Factory function to instantiate adapter by type"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-011",
+      "title": "Implement OpenAI Realtime provider adapter",
+      "description": "Create the first provider adapter for OpenAI's Realtime API using WebSocket streaming. This is the reference implementation.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-010"],
+      "deliverables": [
+        "src/lib/providers/openai-realtime-adapter.ts - Full implementation",
+        "src/lib/providers/openai-realtime-types.ts - OpenAI-specific types"
+      ],
+      "acceptanceCriteria": [
+        "Connects to OpenAI Realtime WebSocket endpoint",
+        "Sends audio prompt and receives streamed response",
+        "Measures TTFB (time to first audio chunk) and total response time",
+        "Handles connection errors gracefully",
+        "Health check verifies API key validity",
+        "Supports configuration: apiKey, model"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-012",
+      "title": "Build AudioPlayer component",
+      "description": "Create a reusable audio player component with waveform visualization using Web Audio API. This is a core UI component used throughout the app.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003"],
+      "deliverables": [
+        "src/components/audio/audio-player.tsx - Main component",
+        "src/components/audio/waveform.tsx - Waveform visualization sub-component",
+        "src/hooks/use-audio-player.ts - Audio playback hook with Web Audio API"
+      ],
+      "acceptanceCriteria": [
+        "Displays waveform visualization of audio",
+        "Play/pause button toggles playback",
+        "Progress bar shows current position, allows seeking",
+        "Displays duration and current time",
+        "Callback when playback completes",
+        "Loading state while audio buffers",
+        "Works with both URLs and AudioBuffer objects"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-013",
+      "title": "Build CategoryPill component",
+      "description": "Create the category selection component used in Arena mode. Pill-style buttons for selecting scenario categories.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003"],
+      "deliverables": [
+        "src/components/arena/category-pill.tsx - Individual pill button",
+        "src/components/arena/category-selector.tsx - Group of pills with selection state"
+      ],
+      "acceptanceCriteria": [
+        "Displays all 5 categories: general, customer-support, information-retrieval, creative, multilingual",
+        "Selected category visually distinguished (filled vs outline)",
+        "onChange callback fires with selected category",
+        "Keyboard accessible (arrow keys to navigate, Enter to select)"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-014",
+      "title": "Build EloChange animation component",
+      "description": "Create the animated Elo rating change display component that shows +/- changes after voting.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003"],
+      "deliverables": [
+        "src/components/arena/elo-change.tsx - Animated Elo delta display"
+      ],
+      "acceptanceCriteria": [
+        "Displays positive changes in green with + prefix",
+        "Displays negative changes in red with - prefix",
+        "Animates the number counting up/down",
+        "Entrance animation (fade in + slide)",
+        "Accepts: previousElo, newElo, or just delta"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-015",
+      "title": "Build ProviderCard component",
+      "description": "Create a consistent card component for displaying provider information, used in settings and reveal screens.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003"],
+      "deliverables": [
+        "src/components/providers/provider-card.tsx - Provider display card"
+      ],
+      "acceptanceCriteria": [
+        "Displays provider name and type badge",
+        "Shows health status indicator (green/red dot)",
+        "Shows current Elo rating if available",
+        "Active/inactive toggle (optional, for settings)",
+        "Compact variant for inline use"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-016",
+      "title": "Create Arena API routes - Match generation",
+      "description": "Implement the POST /api/arena/match endpoint that generates a new match by selecting two providers and getting their responses to a random prompt.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-008", "TASK-010", "TASK-011"],
+      "deliverables": [
+        "src/app/api/arena/match/route.ts - POST handler",
+        "src/lib/services/arena-service.ts - generateMatch() function",
+        "src/lib/services/matchmaking.ts - Provider selection logic"
+      ],
+      "acceptanceCriteria": [
+        "Accepts category parameter in request body",
+        "Selects random prompt from category pool",
+        "Selects two different active providers (weighted by match count)",
+        "Calls both providers in parallel with 30s timeout",
+        "Stores response audio files (local filesystem for v1)",
+        "Returns matchId, prompt info, and both response URLs",
+        "Handles provider failures gracefully (retry with different provider)",
+        "Randomizes A/B assignment"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-017",
+      "title": "Create Arena API routes - Voting",
+      "description": "Implement the POST /api/arena/vote endpoint that records a vote and updates Elo ratings.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-016"],
+      "deliverables": [
+        "src/app/api/arena/vote/route.ts - POST handler",
+        "src/lib/services/elo-service.ts - Elo calculation logic"
+      ],
+      "acceptanceCriteria": [
+        "Accepts matchId and winner (A/B/tie) in request body",
+        "Validates match exists and hasn't been voted on",
+        "Records vote with sessionId for deduplication",
+        "Updates Elo ratings for both providers using Bradley-Terry model",
+        "K-factor: 32, Initial Elo: 1500, Tie = 0.5 win each",
+        "Updates both category-specific and overall ratings",
+        "Returns provider names and new Elo scores",
+        "Rate limited: 10 votes/minute per session"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-018",
+      "title": "Create Arena API routes - Leaderboard",
+      "description": "Implement the GET /api/arena/leaderboard endpoint that returns ranked providers.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-008"],
+      "deliverables": [
+        "src/app/api/arena/leaderboard/route.ts - GET handler"
+      ],
+      "acceptanceCriteria": [
+        "Accepts optional category query parameter",
+        "Returns providers sorted by Elo descending",
+        "Includes: rank, providerId, providerName, elo, matchCount, winRate",
+        "Calculates confidence intervals when matchCount > 30",
+        "Default to 'overall' category if not specified",
+        "Response cached for 60 seconds"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-019",
+      "title": "Build Arena page - Layout and category selection",
+      "description": "Create the main Arena page with hero section, category selector, and the container for the comparison UI.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-009", "TASK-013"],
+      "deliverables": [
+        "src/app/arena/page.tsx - Arena page",
+        "src/app/arena/layout.tsx - Arena layout (if needed)",
+        "src/components/arena/arena-hero.tsx - Hero section with tagline and CTA"
+      ],
+      "acceptanceCriteria": [
+        "Hero section with project tagline and 'Start Comparing' button",
+        "Category selector visible and functional",
+        "Selected category stored in arenaStore",
+        "Responsive layout (desktop: centered content, mobile: full width)",
+        "Loading skeleton while initializing"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-020",
+      "title": "Build Arena page - Match UI and response playback",
+      "description": "Build the match comparison interface with prompt player and dual response players.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-012", "TASK-016", "TASK-019"],
+      "deliverables": [
+        "src/components/arena/match-view.tsx - Main match comparison component",
+        "src/components/arena/prompt-player.tsx - Prompt audio player with optional text",
+        "src/components/arena/response-card.tsx - Individual response player card"
+      ],
+      "acceptanceCriteria": [
+        "Prompt section at top with audio player and optional text toggle",
+        "Two response cards side-by-side (stacked on mobile)",
+        "Response cards labeled 'A' and 'B' with no provider hints",
+        "Play buttons on each response card",
+        "Visual indicator showing which has been played",
+        "Track that both responses must be played before voting",
+        "Loading state while match generates"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-021",
+      "title": "Build Arena page - Voting flow and reveal",
+      "description": "Implement the voting buttons, confirmation, provider reveal animation, and next match flow.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-014", "TASK-015", "TASK-017", "TASK-020"],
+      "deliverables": [
+        "src/components/arena/vote-buttons.tsx - A wins / Tie / B wins buttons",
+        "src/components/arena/reveal-view.tsx - Post-vote provider reveal"
+      ],
+      "acceptanceCriteria": [
+        "Vote buttons disabled until both responses played",
+        "Three buttons: 'A is better', 'Tie', 'B is better'",
+        "Keyboard shortcuts: ← = Vote A, ↓ = Tie, → = Vote B",
+        "Confirmation toast on successful vote",
+        "Reveal animation showing provider names and Elo changes",
+        "Provider cards with EloChange components",
+        "'Play Another' and 'View Leaderboard' buttons after reveal"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-022",
+      "title": "Build Leaderboard page",
+      "description": "Create the public leaderboard page showing provider rankings.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003", "TASK-018"],
+      "deliverables": [
+        "src/app/leaderboard/page.tsx - Leaderboard page",
+        "src/components/leaderboard/leaderboard-table.tsx - Sortable rankings table"
+      ],
+      "acceptanceCriteria": [
+        "Category tabs at top (All, General, Customer Support, etc.)",
+        "Data table with columns: Rank, Provider, Elo, Matches, Win Rate",
+        "Sortable by clicking column headers",
+        "Confidence intervals shown when available",
+        "Responsive: horizontal scroll on mobile",
+        "Empty state if no matches yet"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-023",
+      "title": "Create Provider API routes",
+      "description": "Implement CRUD endpoints for provider management: list, create, update, delete, and health check.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-008", "TASK-010"],
+      "deliverables": [
+        "src/app/api/providers/route.ts - GET (list), POST (create)",
+        "src/app/api/providers/[id]/route.ts - PUT, DELETE",
+        "src/app/api/providers/[id]/test/route.ts - POST health check",
+        "src/lib/services/provider-service.ts - CRUD operations"
+      ],
+      "acceptanceCriteria": [
+        "GET /api/providers returns all providers with ratings and health status",
+        "POST /api/providers creates new provider with validated config",
+        "PUT /api/providers/:id updates provider settings",
+        "DELETE /api/providers/:id removes provider (soft delete recommended)",
+        "POST /api/providers/:id/test runs health check, returns latency or error",
+        "API key stored encrypted (or at least not returned in responses)"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-024",
+      "title": "Build Settings page - Provider management",
+      "description": "Create the settings page with provider configuration UI including add, edit, test, and enable/disable functionality.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003", "TASK-015", "TASK-023"],
+      "deliverables": [
+        "src/app/settings/page.tsx - Settings page",
+        "src/components/settings/provider-list.tsx - Provider accordion list",
+        "src/components/settings/provider-form.tsx - Add/edit provider form",
+        "src/components/settings/provider-config-fields.tsx - Type-specific form fields"
+      ],
+      "acceptanceCriteria": [
+        "Accordion list of configured providers",
+        "Each accordion shows: name, type, health status, active toggle",
+        "Expanded view shows configuration form",
+        "'Test Connection' button runs health check with result display",
+        "'Add Provider' button opens form dialog",
+        "Form validates required fields before submission",
+        "Type-specific fields (OpenAI: apiKey, model; Gemini: apiKey, model; etc.)",
+        "Confirmation dialog before delete"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-025",
+      "title": "Create Scenario YAML parser and validator",
+      "description": "Build the YAML parser for scenario definitions with schema validation using Zod.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-007"],
+      "deliverables": [
+        "src/lib/eval/scenario-parser.ts - YAML parsing and validation",
+        "src/lib/eval/scenario-schema.ts - Zod schema for scenarios",
+        "src/types/scenario-yaml.ts - TypeScript types for YAML structure"
+      ],
+      "acceptanceCriteria": [
+        "Parses YAML with multiple scenarios",
+        "Validates required fields: id, name, type, prompt, expected_outcome",
+        "Validates optional fields: tags, difficulty, language",
+        "Returns detailed validation errors with line numbers",
+        "Supports both single scenario and batch import",
+        "Handles audio file references (validates file exists or URL valid)"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-026",
+      "title": "Integrate Whisper for transcription",
+      "description": "Set up Whisper API integration for transcribing audio responses to calculate WER.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-001"],
+      "deliverables": [
+        "src/lib/eval/whisper-service.ts - Whisper API integration",
+        "src/lib/eval/wer-calculator.ts - Word Error Rate calculation"
+      ],
+      "acceptanceCriteria": [
+        "Transcribes audio file/buffer using OpenAI Whisper API",
+        "Returns transcript text and confidence scores",
+        "WER calculator compares transcript to expected text",
+        "Handles multiple languages (language detection or specified)",
+        "Graceful error handling for transcription failures"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-027",
+      "title": "Implement LLM-as-Judge scoring",
+      "description": "Create the LLM-as-judge integration for scoring responses on multiple dimensions.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-007"],
+      "deliverables": [
+        "src/lib/eval/judge-service.ts - LLM judge integration",
+        "src/lib/eval/judge-prompts.ts - Evaluation prompts per scenario type"
+      ],
+      "acceptanceCriteria": [
+        "Calls configured judge model (default: GPT-4o)",
+        "Scores 1-10 on four dimensions: Accuracy, Helpfulness, Naturalness, Efficiency",
+        "Returns structured output with scores and reasoning text",
+        "Different evaluation prompts for each scenario type",
+        "Task completion binary determination",
+        "Handles judge API errors gracefully"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-028",
+      "title": "Build Eval run execution engine",
+      "description": "Create the core execution engine that runs evaluation scenarios against providers and collects metrics.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-010", "TASK-026", "TASK-027"],
+      "deliverables": [
+        "src/lib/eval/eval-engine.ts - Main execution engine",
+        "src/lib/eval/metrics-collector.ts - Metrics collection helper"
+      ],
+      "acceptanceCriteria": [
+        "Executes scenarios sequentially with progress tracking",
+        "Calls providers in parallel for each scenario",
+        "Measures TTFB and total response time per provider",
+        "Runs Whisper transcription and WER calculation",
+        "Runs LLM-as-judge scoring",
+        "Stores all results in database",
+        "Supports resume from last completed scenario if interrupted",
+        "Timeout handling per provider (30s)",
+        "Updates run progress percentage in real-time"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-029",
+      "title": "Create Eval API routes",
+      "description": "Implement the API endpoints for eval runs: create/start, get details, list runs, and export.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-028"],
+      "deliverables": [
+        "src/app/api/eval/runs/route.ts - GET (list), POST (create)",
+        "src/app/api/eval/runs/[id]/route.ts - GET (details)",
+        "src/app/api/eval/runs/[id]/export/route.ts - GET (export JSON/CSV)",
+        "src/app/api/scenarios/route.ts - GET (list), POST (create)",
+        "src/app/api/scenarios/import/route.ts - POST (YAML import)"
+      ],
+      "acceptanceCriteria": [
+        "POST /api/eval/runs creates run and starts execution",
+        "GET /api/eval/runs lists all runs with status",
+        "GET /api/eval/runs/:id returns run details with all results and aggregates",
+        "GET /api/eval/runs/:id/export returns JSON or CSV based on format param",
+        "POST /api/scenarios creates individual scenario",
+        "POST /api/scenarios/import parses YAML and creates multiple scenarios",
+        "Aggregates calculated: mean, median, p95, std dev for all metrics"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-030",
+      "title": "Build Eval Runs list page",
+      "description": "Create the page listing all evaluation runs with their status and basic info.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003", "TASK-029"],
+      "deliverables": [
+        "src/app/eval/page.tsx - Eval runs list page",
+        "src/components/eval/run-list.tsx - Runs table/list component",
+        "src/components/eval/run-status-badge.tsx - Status badge component"
+      ],
+      "acceptanceCriteria": [
+        "Table/list of all eval runs",
+        "Columns: Name, Status, Date, Providers, Scenarios, Progress",
+        "Status badges: Pending (gray), Running (blue animated), Completed (green), Failed (red)",
+        "'New Run' button navigates to run creation",
+        "Click row navigates to run detail",
+        "Empty state with CTA to create first run"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-031",
+      "title": "Build Eval Run creation wizard",
+      "description": "Create the multi-step wizard for creating and starting a new evaluation run.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-009", "TASK-029", "TASK-030"],
+      "deliverables": [
+        "src/app/eval/new/page.tsx - New run wizard page",
+        "src/components/eval/run-wizard.tsx - Multi-step wizard container",
+        "src/components/eval/wizard-step-providers.tsx - Provider selection step",
+        "src/components/eval/wizard-step-scenarios.tsx - Scenario selection step",
+        "src/components/eval/wizard-step-review.tsx - Review and confirm step"
+      ],
+      "acceptanceCriteria": [
+        "Step 1: Name the run, select providers (multi-select with checkboxes)",
+        "Step 2: Select scenarios (individual, by tag filter, or select all)",
+        "Step 3: Review summary showing selections and estimated time",
+        "Back/Next navigation between steps",
+        "'Start Run' button creates and begins execution",
+        "Redirects to run detail page after starting"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-032",
+      "title": "Build Eval Run detail page",
+      "description": "Create the detailed view of a completed or in-progress evaluation run with results and charts.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003", "TASK-029"],
+      "deliverables": [
+        "src/app/eval/[id]/page.tsx - Run detail page",
+        "src/components/eval/run-header.tsx - Run name, status, progress",
+        "src/components/eval/results-table.tsx - Expandable results table",
+        "src/components/eval/result-detail.tsx - Expanded row with audio, transcript, reasoning"
+      ],
+      "acceptanceCriteria": [
+        "Header: Run name, status badge, progress bar, duration",
+        "Results table: Scenario | Provider | Scores (4 dims) | Metrics | Actions",
+        "Expandable rows showing: response audio player, transcript, judge reasoning",
+        "Aggregate stats section by provider",
+        "Export button with JSON/CSV dropdown",
+        "Progress updates in real-time for running evaluations"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-033",
+      "title": "Install and configure Tremor charts",
+      "description": "Set up the Tremor charting library and create chart components for eval results visualization.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-002"],
+      "deliverables": [
+        "package.json - @tremor/react dependency",
+        "src/components/charts/score-radar.tsx - Radar chart for multi-dimension scores",
+        "src/components/charts/metrics-bar.tsx - Bar chart for metrics comparison",
+        "src/components/charts/elo-trend.tsx - Sparkline for Elo trend"
+      ],
+      "acceptanceCriteria": [
+        "Tremor installed and configured with Tailwind",
+        "Radar chart displays 4 dimensions per provider",
+        "Bar chart compares metrics across providers",
+        "Sparkline shows 7-day Elo trend",
+        "Charts responsive and accessible",
+        "Consistent styling with shadcn/ui theme"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-034",
+      "title": "Build Scenario Library page",
+      "description": "Create the page for browsing, filtering, and managing saved scenarios.",
+      "type": "feature",
+      "priority": "P1",
+      "dependencies": ["TASK-029"],
+      "deliverables": [
+        "src/app/eval/scenarios/page.tsx - Scenario library page",
+        "src/components/eval/scenario-grid.tsx - Grid/list view of scenarios",
+        "src/components/eval/scenario-card.tsx - Individual scenario card",
+        "src/components/eval/scenario-filters.tsx - Filter sidebar"
+      ],
+      "acceptanceCriteria": [
+        "Grid/list toggle view",
+        "Filter sidebar: type, tags, language, difficulty",
+        "Scenario cards: name, type badge, tags, prompt preview",
+        "Click card opens detail modal/page",
+        "Import YAML button with file upload",
+        "Export selected scenarios as YAML",
+        "Bulk select and delete with confirmation"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-035",
+      "title": "Implement keyboard shortcuts",
+      "description": "Add keyboard navigation and shortcuts throughout the app as specified in the UX requirements.",
+      "type": "feature",
+      "priority": "P1",
+      "dependencies": ["TASK-021", "TASK-022"],
+      "deliverables": [
+        "src/hooks/use-keyboard-shortcuts.ts - Keyboard shortcut hook",
+        "src/components/keyboard-hint.tsx - Visual keyboard hint component"
+      ],
+      "acceptanceCriteria": [
+        "Arena: 1 = Play A, 2 = Play B, ← = Vote A, ↓ = Tie, → = Vote B",
+        "Tables: Arrow key navigation, Enter to expand",
+        "Global: ? shows shortcuts help modal",
+        "Shortcuts work only when appropriate (e.g., voting only when enabled)",
+        "Visual hints shown near relevant controls"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-036",
+      "title": "Create seed data - Prompts and scenarios",
+      "description": "Create initial seed data with at least 20 prompts per category and pre-built scenario templates.",
+      "type": "setup",
+      "priority": "P0",
+      "dependencies": ["TASK-008"],
+      "deliverables": [
+        "src/db/seed/prompts.ts - Seed prompts (100+ total)",
+        "src/db/seed/scenarios.ts - Pre-built scenario sets",
+        "data/scenarios/customer-support.yaml - Customer Support Basics (10 scenarios)",
+        "data/scenarios/general-knowledge.yaml - General Knowledge (15 scenarios)",
+        "data/scenarios/multilingual.yaml - Multilingual Test (20 scenarios)",
+        "package.json script - db:seed"
+      ],
+      "acceptanceCriteria": [
+        "Minimum 20 prompts per category (100 total)",
+        "Prompts are diverse and test different capabilities",
+        "Three scenario templates as specified in FR-E08",
+        "Seed script idempotent (can run multiple times)",
+        "Scenarios cover all three types: task-completion, information-retrieval, conversation-flow"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-037",
+      "title": "Implement Arena match history",
+      "description": "Add the match history endpoint and UI showing recent anonymous match results.",
+      "type": "feature",
+      "priority": "P1",
+      "dependencies": ["TASK-017"],
+      "deliverables": [
+        "src/app/api/arena/history/route.ts - GET handler",
+        "src/components/arena/match-history.tsx - History list component"
+      ],
+      "acceptanceCriteria": [
+        "GET /api/arena/history returns last 100 matches",
+        "Response: Category, Winner (A/B/Tie), Timestamp",
+        "No provider names exposed in history",
+        "Component displays as a simple list/table",
+        "Accessible from leaderboard page"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-038",
+      "title": "Add navigation and polish app shell",
+      "description": "Create the global navigation, footer, and overall app shell with proper routing.",
+      "type": "feature",
+      "priority": "P0",
+      "dependencies": ["TASK-003"],
+      "deliverables": [
+        "src/components/layout/navbar.tsx - Global navigation bar",
+        "src/components/layout/footer.tsx - Footer with links",
+        "src/app/layout.tsx - Updated root layout with nav/footer",
+        "src/components/layout/mobile-nav.tsx - Mobile hamburger menu"
+      ],
+      "acceptanceCriteria": [
+        "Navbar with links: Arena, Leaderboard, Eval, Settings",
+        "Active link highlighted",
+        "Mobile hamburger menu for small screens",
+        "Logo/brand in navbar linking to home",
+        "Footer with GitHub link and version",
+        "Consistent across all pages"
+      ],
+      "estimatedComplexity": "small"
+    },
+    {
+      "id": "TASK-039",
+      "title": "Implement Gemini Live provider adapter",
+      "description": "Create the provider adapter for Google's Gemini Live API.",
+      "type": "feature",
+      "priority": "P1",
+      "dependencies": ["TASK-010"],
+      "deliverables": [
+        "src/lib/providers/gemini-live-adapter.ts - Full implementation",
+        "src/lib/providers/gemini-live-types.ts - Gemini-specific types"
+      ],
+      "acceptanceCriteria": [
+        "Connects to Gemini Live streaming endpoint",
+        "Sends audio prompt and receives response",
+        "Measures TTFB and total response time",
+        "Health check verifies API key",
+        "Supports configuration: apiKey, model"
+      ],
+      "estimatedComplexity": "large"
+    },
+    {
+      "id": "TASK-040",
+      "title": "Implement ElevenLabs TTS provider adapter",
+      "description": "Create the provider adapter for ElevenLabs text-to-speech API.",
+      "type": "feature",
+      "priority": "P1",
+      "dependencies": ["TASK-010"],
+      "deliverables": [
+        "src/lib/providers/elevenlabs-adapter.ts - Full implementation",
+        "src/lib/providers/elevenlabs-types.ts - ElevenLabs-specific types"
+      ],
+      "acceptanceCriteria": [
+        "Calls ElevenLabs TTS API with text prompt",
+        "Returns audio response",
+        "Measures latency metrics",
+        "Health check verifies API key and voice ID",
+        "Supports configuration: apiKey, voiceId, modelId"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-041",
+      "title": "Implement Custom WebSocket provider adapter",
+      "description": "Create a generic WebSocket adapter for custom voice endpoints.",
+      "type": "feature",
+      "priority": "P1",
+      "dependencies": ["TASK-010"],
+      "deliverables": [
+        "src/lib/providers/custom-ws-adapter.ts - Generic WS implementation"
+      ],
+      "acceptanceCriteria": [
+        "Connects to arbitrary WebSocket endpoint",
+        "Supports custom headers for auth",
+        "Generic message format (configurable)",
+        "Health check pings endpoint",
+        "Timeout handling"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-042",
+      "title": "Write documentation and README",
+      "description": "Create comprehensive documentation including README, setup guide, and architecture docs.",
+      "type": "docs",
+      "priority": "P0",
+      "dependencies": ["TASK-036"],
+      "deliverables": [
+        "README.md - Project overview, setup, usage",
+        "docs/ARCHITECTURE.md - Technical architecture overview",
+        "docs/PROVIDERS.md - Guide to adding new providers",
+        "docs/SCENARIOS.md - YAML schema reference and examples",
+        "docs/API.md - API endpoint documentation"
+      ],
+      "acceptanceCriteria": [
+        "README covers: what it is, quick start, configuration, development",
+        "Architecture doc explains system components and data flow",
+        "Provider guide enables adding new integrations",
+        "Scenario guide explains YAML format with examples",
+        "API doc covers all endpoints with request/response examples"
+      ],
+      "estimatedComplexity": "medium"
+    },
+    {
+      "id": "TASK-043",
+      "title": "Add error handling and edge cases",
+      "description": "Implement comprehensive error handling, edge cases, and user-friendly error states throughout the app.",
+      "type": "refactor",
+      "priority": "P1",
+      "dependencies": ["TASK-021", "TASK-032"],
+      "deliverables": [
+        "src/components/error-boundary.tsx - React error boundary",
+        "src/components/empty-state.tsx - Reusable empty state component",
+        "src/lib/errors.ts - Custom error classes",
+        "Updates to all pages for error/empty states"
+      ],
+      "acceptanceCriteria": [
+        "Global error boundary catches React errors",
+        "API routes return consistent error format",
+        "All pages have appropriate empty states with CTAs",
+        "Network errors show retry option",
+        "Provider failures handled gracefully in Arena (skip and re-pair)",
+        "Form validation errors shown inline"
+      ],
+      "estimatedComplexity": "medium"
+    }
+  ]
+}
