@@ -10,11 +10,18 @@ import { ProviderAdapter } from './base-adapter';
 import type { AdapterOptions } from './types';
 import { ProviderError } from './types';
 
+// Import concrete adapters
+import { OpenAIRealtimeAdapter } from './openai-realtime-adapter';
+
 // Re-export types
 export * from './types';
+export * from './openai-realtime-types';
 
 // Re-export base adapter
 export { ProviderAdapter } from './base-adapter';
+
+// Re-export concrete adapters
+export { OpenAIRealtimeAdapter } from './openai-realtime-adapter';
 
 /**
  * Type for adapter constructor function
@@ -156,3 +163,9 @@ export function unregisterAdapter(type: ProviderType): boolean {
 export function clearAdapterRegistry(): void {
   adapterRegistry.clear();
 }
+
+// =============================================================================
+// Auto-register built-in adapters
+// =============================================================================
+
+registerAdapter('openai', OpenAIRealtimeAdapter);
