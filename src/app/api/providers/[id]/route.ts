@@ -19,7 +19,7 @@ import {
  */
 const updateProviderSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name too long').optional(),
-  type: z.enum(['openai', 'gemini', 'elevenlabs', 'custom']).optional(),
+  type: z.enum(['openai', 'gemini', 'elevenlabs', 'retell', 'custom']).optional(),
   config: z.object({
     apiKey: z.string().optional(),
     endpoint: z.string().url().optional(),

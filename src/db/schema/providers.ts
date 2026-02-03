@@ -14,8 +14,8 @@ export const providers = sqliteTable('providers', {
   /** Display name */
   name: text('name').notNull(),
 
-  /** Provider type: 'openai' | 'gemini' | 'elevenlabs' | 'custom' */
-  type: text('type', { enum: ['openai', 'gemini', 'elevenlabs', 'custom'] }).notNull(),
+  /** Provider type: 'openai' | 'gemini' | 'elevenlabs' | 'retell' | 'custom' */
+  type: text('type', { enum: ['openai', 'gemini', 'elevenlabs', 'retell', 'custom'] }).notNull(),
 
   /** Provider configuration (stored as JSON) */
   config: text('config', { mode: 'json' }).notNull().default('{}'),

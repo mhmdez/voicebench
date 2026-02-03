@@ -39,7 +39,7 @@ import type { Provider, ProviderType } from '@/types/provider';
 /** Form validation schema */
 const providerFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  type: z.enum(['openai', 'gemini', 'elevenlabs', 'custom'] as const),
+  type: z.enum(['openai', 'gemini', 'elevenlabs', 'retell', 'custom'] as const),
   apiKey: z.string().optional(),
   endpoint: z.string().url('Invalid URL').optional().or(z.literal('')),
   model: z.string().optional(),
@@ -54,6 +54,7 @@ const providerTypeLabels: Record<ProviderType, string> = {
   openai: 'OpenAI',
   gemini: 'Google Gemini',
   elevenlabs: 'ElevenLabs',
+  retell: 'Retell AI',
   custom: 'Custom Provider',
 };
 
@@ -296,7 +297,9 @@ export function ProviderForm({
                           ? 'gpt-4o-realtime-preview'
                           : watchType === 'gemini'
                             ? 'gemini-2.0-flash'
-                            : 'model-id'
+                            : watchType === 'retell'
+                              ? 'Agent handles model selection'
+                              : 'model-id'
                       }
                       {...field}
                     />
@@ -306,17 +309,35 @@ export function ProviderForm({
               )}
             />
 
-            {/* Voice ID (for ElevenLabs) */}
-            {watchType === 'elevenlabs' && (
+            {/* Voice ID (for ElevenLabs, Gemini, Retell) */}
+            {(watchType === 'elevenlabs' || watchType === 'gemini' || watchType === 'retell') && (
               <FormField
                 control={form.control}
                 name="voiceId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Voice ID</FormLabel>
+                    <FormLabel>
+                      {watchType === 'retell' ? 'Agent ID' : 'Voice ID'}
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="voice-id" {...field} />
+                      <Input
+                        placeholder={
+                          watchType === 'retell'
+                            ? 'agent_xxx'
+                            : watchType === 'gemini'
+                              ? 'en-US-Studio-O'
+                              : 'voice-id'
+                        }
+                        {...field}
+                      />
                     </FormControl>
+                    <FormDescription>
+                      {watchType === 'retell'
+                        ? 'Your Retell AI agent ID from the dashboard'
+                        : watchType === 'gemini'
+                          ? 'Google Cloud TTS voice name'
+                          : 'ElevenLabs voice identifier'}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

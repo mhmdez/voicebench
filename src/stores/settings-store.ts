@@ -6,7 +6,7 @@ import { immer } from 'zustand/middleware/immer';
 export interface ProviderConfig {
   id: string;
   name: string;
-  type: 'openai' | 'anthropic' | 'google' | 'elevenlabs' | 'custom';
+  type: 'openai' | 'anthropic' | 'google' | 'gemini' | 'elevenlabs' | 'retell' | 'custom';
   apiKey?: string;
   baseUrl?: string;
   enabled: boolean;

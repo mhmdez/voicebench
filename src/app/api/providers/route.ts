@@ -14,7 +14,7 @@ import { getAllProviders, createProvider } from '@/lib/services/provider-service
  */
 const createProviderSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  type: z.enum(['openai', 'gemini', 'elevenlabs', 'custom']),
+  type: z.enum(['openai', 'gemini', 'elevenlabs', 'retell', 'custom']),
   config: z.object({
     apiKey: z.string().optional(),
     endpoint: z.string().url().optional(),

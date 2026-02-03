@@ -38,7 +38,7 @@ export interface RevealViewProps {
 }
 
 function toProviderType(value: string | undefined): ProviderType {
-  if (value === "openai" || value === "gemini" || value === "elevenlabs" || value === "custom") {
+  if (value === "openai" || value === "gemini" || value === "elevenlabs" || value === "retell" || value === "custom") {
     return value
   }
   return "custom"

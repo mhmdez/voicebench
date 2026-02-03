@@ -5,7 +5,7 @@
  */
 
 /** Supported provider types */
-export type ProviderType = 'openai' | 'gemini' | 'elevenlabs' | 'custom';
+export type ProviderType = 'openai' | 'gemini' | 'elevenlabs' | 'retell' | 'custom';
 
 /** Provider-specific configuration */
 export interface ProviderConfig {

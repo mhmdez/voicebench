@@ -45,6 +45,7 @@ const providerTypeBadgeVariant: Record<
   openai: 'default',
   gemini: 'secondary',
   elevenlabs: 'outline',
+  retell: 'secondary',
   custom: 'outline',
 };
 
@@ -53,6 +54,7 @@ const providerTypeLabels: Record<ProviderType, string> = {
   openai: 'OpenAI',
   gemini: 'Gemini',
   elevenlabs: 'ElevenLabs',
+  retell: 'Retell AI',
   custom: 'Custom',
 };
 

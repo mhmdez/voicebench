@@ -12,6 +12,8 @@ import { ProviderError } from './types';
 
 // Import concrete adapters
 import { OpenAIRealtimeAdapter } from './openai-realtime-adapter';
+import { GeminiAdapter } from './gemini-adapter';
+import { RetellAdapter } from './retell-adapter';
 
 // Re-export types
 export * from './types';
@@ -22,6 +24,8 @@ export { ProviderAdapter } from './base-adapter';
 
 // Re-export concrete adapters
 export { OpenAIRealtimeAdapter } from './openai-realtime-adapter';
+export { GeminiAdapter } from './gemini-adapter';
+export { RetellAdapter } from './retell-adapter';
 
 /**
  * Type for adapter constructor function
@@ -169,3 +173,5 @@ export function clearAdapterRegistry(): void {
 // =============================================================================
 
 registerAdapter('openai', OpenAIRealtimeAdapter);
+registerAdapter('gemini', GeminiAdapter);
+registerAdapter('retell', RetellAdapter);
