@@ -33,7 +33,7 @@ function rowToProvider(row: typeof providers.$inferSelect): Provider {
   return {
     id: row.id,
     name: row.name,
-    type: row.type as Provider['type'],
+    type: row.type as Provider['type'], // supports openai, gemini, retell, elevenlabs, custom
     config: (row.config || {}) as Provider['config'],
     isActive: row.isActive,
     createdAt: row.createdAt,
