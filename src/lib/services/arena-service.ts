@@ -395,13 +395,11 @@ export async function generateMatch(
 
     // Check for failures
     if (!resultA.success && !resultB.success) {
+      // Fall back to demo mode when both providers fail (e.g. invalid API keys)
+      console.log('[Arena] Both providers failed, falling back to demo mode');
       return {
-        success: false,
-        error: {
-          error: 'Both providers failed to generate responses',
-          code: 'PROVIDER_FAILURE',
-          details: `Provider A: ${resultA.error}, Provider B: ${resultB.error}`,
-        },
+        success: true,
+        match: await createMockMatch(category),
       };
     }
 
