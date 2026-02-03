@@ -71,11 +71,11 @@ export default function SettingsPage() {
             <h1 className="text-xl font-semibold">Settings</h1>
           </div>
           <nav className="flex items-center gap-4">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-              Home
+            <Link href="/eval/live" className="text-sm text-muted-foreground hover:text-foreground">
+              Eval
             </Link>
-            <Link href="/arena" className="text-sm text-muted-foreground hover:text-foreground">
-              Arena
+            <Link href="/results" className="text-sm text-muted-foreground hover:text-foreground">
+              Results
             </Link>
           </nav>
         </div>

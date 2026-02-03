@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
 
 /**
- * Homepage redirects straight to the Arena.
- * This is a research/developer tool, not a consumer product.
- * The README is the "landing page" — GitHub visitors read that.
+ * Homepage redirects to Live Eval — the core feature.
  */
 export default function Home() {
-  redirect("/arena");
+  redirect("/eval/live");
 }
