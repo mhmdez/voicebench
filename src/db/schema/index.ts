@@ -17,3 +17,6 @@ export * from "./votes";
 export * from "./scenarios";
 export * from "./eval-runs";
 export * from "./eval-results";
+
+// Live eval schemas (Sessions, Turns, Ratings)
+export * from "./eval-sessions";
