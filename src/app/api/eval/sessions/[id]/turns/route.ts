@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db, evalSessions, evalTurns, providers } from '@/db';
 import { createAdapter } from '@/lib/providers';
 import type { ProviderConfig } from '@/types/provider';
