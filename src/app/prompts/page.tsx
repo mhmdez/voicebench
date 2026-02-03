@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Plus, Trash2, FileText } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -44,16 +44,10 @@ interface Scenario {
   createdAt: string;
 }
 
-const difficultyColors: Record<string, string> = {
-  easy: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  hard: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-};
-
 const typeLabels: Record<string, string> = {
   'task-completion': 'Task',
   'information-retrieval': 'Info',
-  'conversation-flow': 'Conversation',
+  'conversation-flow': 'Conv',
 };
 
 export default function PromptsPage() {
@@ -64,7 +58,6 @@ export default function PromptsPage() {
   const [filterDifficulty, setFilterDifficulty] = React.useState<string>('all');
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  // Form state
   const [formName, setFormName] = React.useState('');
   const [formPrompt, setFormPrompt] = React.useState('');
   const [formType, setFormType] = React.useState('task-completion');
@@ -76,9 +69,7 @@ export default function PromptsPage() {
     try {
       const res = await fetch('/api/scenarios');
       const data = await res.json();
-      if (data.success) {
-        setScenarios(data.data);
-      }
+      if (data.success) setScenarios(data.data);
     } catch (error) {
       console.error('Error fetching scenarios:', error);
       toast.error('Failed to load prompts');
@@ -87,65 +78,39 @@ export default function PromptsPage() {
     }
   }, []);
 
-  React.useEffect(() => {
-    fetchScenarios();
-  }, [fetchScenarios]);
+  React.useEffect(() => { fetchScenarios(); }, [fetchScenarios]);
 
   const handleCreate = async () => {
-    if (!formName.trim() || !formPrompt.trim()) {
-      toast.error('Name and prompt are required');
-      return;
-    }
+    if (!formName.trim() || !formPrompt.trim()) { toast.error('Name and prompt required'); return; }
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/scenarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formName,
-          prompt: formPrompt,
-          type: formType,
-          expectedOutcome: formExpectedOutcome || 'N/A',
-          difficulty: formDifficulty,
+          name: formName, prompt: formPrompt, type: formType,
+          expectedOutcome: formExpectedOutcome || 'N/A', difficulty: formDifficulty,
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        toast.success('Prompt created');
-        setIsCreateOpen(false);
-        resetForm();
-        fetchScenarios();
-      } else {
-        toast.error(data.error || 'Failed to create prompt');
-      }
-    } catch {
-      toast.error('Failed to create prompt');
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (data.success) { toast.success('Created'); setIsCreateOpen(false); resetForm(); fetchScenarios(); }
+      else toast.error(data.error || 'Failed');
+    } catch { toast.error('Failed to create'); }
+    finally { setIsSubmitting(false); }
   };
 
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/scenarios/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      if (data.success) {
-        toast.success('Prompt deleted');
-        fetchScenarios();
-      } else {
-        toast.error(data.error || 'Failed to delete prompt');
-      }
-    } catch {
-      toast.error('Failed to delete prompt');
-    }
+      if (data.success) { toast.success('Deleted'); fetchScenarios(); }
+      else toast.error(data.error || 'Failed');
+    } catch { toast.error('Failed to delete'); }
   };
 
   const resetForm = () => {
-    setFormName('');
-    setFormPrompt('');
-    setFormType('task-completion');
-    setFormExpectedOutcome('');
-    setFormDifficulty('medium');
+    setFormName(''); setFormPrompt(''); setFormType('task-completion');
+    setFormExpectedOutcome(''); setFormDifficulty('medium');
   };
 
   const filtered = scenarios.filter((s) => {
@@ -159,73 +124,59 @@ export default function PromptsPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <FileText className="h-6 w-6" />
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Prompts</h1>
-            <p className="text-muted-foreground text-sm">
-              {scenarios.length} scenarios available
-            </p>
-          </div>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">Prompts</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            <span className="font-metric">{scenarios.length}</span> scenarios
+          </p>
         </div>
 
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Prompt
+            <Button size="sm">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Create
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[480px]">
             <DialogHeader>
               <DialogTitle>Create Prompt</DialogTitle>
-              <DialogDescription>
-                Add a new evaluation scenario for testing voice AI providers.
-              </DialogDescription>
+              <DialogDescription>Add an evaluation scenario.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g. Restaurant Booking"
-                />
+              <div className="grid gap-1.5">
+                <Label htmlFor="name" className="text-xs">Name</Label>
+                <Input id="name" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="e.g. Restaurant Booking" />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="prompt">Prompt Text</Label>
+              <div className="grid gap-1.5">
+                <Label htmlFor="prompt" className="text-xs">Prompt Text</Label>
                 <textarea
                   id="prompt"
-                  className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex min-h-[80px] w-full rounded border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={formPrompt}
                   onChange={(e) => setFormPrompt(e.target.value)}
                   placeholder="What should the user say to the AI agent?"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label>Category</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Category</Label>
                   <Select value={formType} onValueChange={setFormType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="task-completion">Task Completion</SelectItem>
-                      <SelectItem value="information-retrieval">Information Retrieval</SelectItem>
-                      <SelectItem value="conversation-flow">Conversation Flow</SelectItem>
+                      <SelectItem value="information-retrieval">Info Retrieval</SelectItem>
+                      <SelectItem value="conversation-flow">Conversation</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid gap-2">
-                  <Label>Difficulty</Label>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Difficulty</Label>
                   <Select value={formDifficulty} onValueChange={setFormDifficulty}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="easy">Easy</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
@@ -234,21 +185,14 @@ export default function PromptsPage() {
                   </Select>
                 </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="expected">Expected Outcome (optional)</Label>
-                <Input
-                  id="expected"
-                  value={formExpectedOutcome}
-                  onChange={(e) => setFormExpectedOutcome(e.target.value)}
-                  placeholder="What a good response looks like"
-                />
+              <div className="grid gap-1.5">
+                <Label htmlFor="expected" className="text-xs">Expected Outcome</Label>
+                <Input id="expected" value={formExpectedOutcome} onChange={(e) => setFormExpectedOutcome(e.target.value)} placeholder="Optional" />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreate} disabled={isSubmitting}>
+              <Button variant="outline" size="sm" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+              <Button size="sm" onClick={handleCreate} disabled={isSubmitting}>
                 {isSubmitting ? 'Creating...' : 'Create'}
               </Button>
             </DialogFooter>
@@ -257,30 +201,26 @@ export default function PromptsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-3 mb-4">
         <Input
-          placeholder="Search prompts..."
+          placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-xs"
+          className="max-w-[240px] h-8 text-sm"
         />
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[150px] h-8 text-sm"><SelectValue placeholder="Category" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="task-completion">Task Completion</SelectItem>
-            <SelectItem value="information-retrieval">Information Retrieval</SelectItem>
-            <SelectItem value="conversation-flow">Conversation Flow</SelectItem>
+            <SelectItem value="task-completion">Task</SelectItem>
+            <SelectItem value="information-retrieval">Info Retrieval</SelectItem>
+            <SelectItem value="conversation-flow">Conversation</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Difficulty" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[120px] h-8 text-sm"><SelectValue placeholder="Difficulty" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Levels</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="easy">Easy</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
             <SelectItem value="hard">Hard</SelectItem>
@@ -290,48 +230,51 @@ export default function PromptsPage() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading prompts...</div>
+        <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          {scenarios.length === 0 ? 'No prompts yet. Create one to get started.' : 'No prompts match your filters.'}
+        <div className="text-center py-12 text-sm text-muted-foreground">
+          {scenarios.length === 0 ? 'No prompts. Create one above.' : 'No matches.'}
         </div>
       ) : (
-        <div className="border rounded-lg">
+        <div className="border rounded">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px]">Name</TableHead>
-                <TableHead className="w-[100px]">Category</TableHead>
-                <TableHead>Prompt</TableHead>
-                <TableHead className="w-[90px]">Difficulty</TableHead>
-                <TableHead className="w-[60px]"></TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-xs font-medium text-muted-foreground h-9">Name</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9 w-[80px]">Type</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9">Prompt</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9 w-[70px]">Diff</TableHead>
+                <TableHead className="h-9 w-[40px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((scenario) => (
-                <TableRow key={scenario.id}>
-                  <TableCell className="font-medium">{scenario.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs">
-                      {typeLabels[scenario.type] || scenario.type}
+              {filtered.map((s) => (
+                <TableRow key={s.id} className="group">
+                  <TableCell className="text-sm font-medium py-2">{s.name}</TableCell>
+                  <TableCell className="py-2">
+                    <Badge variant="outline" className="text-[11px] font-normal px-1.5 py-0">
+                      {typeLabels[s.type] || s.type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="max-w-[400px] truncate text-muted-foreground text-sm">
-                    {scenario.prompt}
+                  <TableCell className="max-w-[360px] truncate text-sm text-muted-foreground py-2">
+                    {s.prompt}
                   </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${difficultyColors[scenario.difficulty] || ''}`}>
-                      {scenario.difficulty}
+                  <TableCell className="py-2">
+                    <span className={`text-[11px] font-metric ${
+                      s.difficulty === 'easy' ? 'text-green-400' :
+                      s.difficulty === 'hard' ? 'text-red-400' : 'text-yellow-400'
+                    }`}>
+                      {s.difficulty}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(scenario.id)}
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDelete(s.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </TableCell>
                 </TableRow>

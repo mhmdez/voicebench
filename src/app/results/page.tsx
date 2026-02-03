@@ -2,16 +2,9 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { BarChart3, Calendar, ChevronRight, Clock, MessageSquare, Star } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -43,10 +36,18 @@ interface SessionSummary {
   humanScore: number | null;
 }
 
-interface Provider {
-  id: number;
-  name: string;
-  type: string;
+interface Provider { id: number; name: string; type: string; }
+
+function StatCard({ label, value, unit }: { label: string; value: number | string; unit?: string }) {
+  return (
+    <div className="border rounded bg-card p-3">
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+      <p className="font-metric text-xl font-semibold leading-none">
+        {value}
+        {unit && <span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>}
+      </p>
+    </div>
+  );
 }
 
 export default function ResultsPage() {
@@ -73,9 +74,7 @@ export default function ResultsPage() {
     return true;
   });
 
-  // Summary stats
   const completedSessions = sessions.filter(s => s.status === 'completed');
-  const totalSessions = sessions.length;
   const avgLatency = completedSessions.length > 0
     ? Math.round(completedSessions.reduce((s, sess) => s + (sess.avgTtfbMs ?? 0), 0) / completedSessions.length)
     : 0;
@@ -86,75 +85,31 @@ export default function ResultsPage() {
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="p-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <BarChart3 className="h-6 w-6" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Results</h1>
-          <p className="text-muted-foreground text-sm">
-            Review and compare eval session results
-          </p>
-        </div>
+      <div className="mb-5">
+        <h1 className="text-lg font-semibold tracking-tight">Results</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Session history and performance analytics
+        </p>
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Total Sessions</p>
-            </div>
-            <p className="text-2xl font-bold">{totalSessions}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="h-4 w-4 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Completed</p>
-            </div>
-            <p className="text-2xl font-bold">{completedSessions.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Avg Latency</p>
-            </div>
-            <p className="text-2xl font-bold">{avgLatency}<span className="text-sm font-normal text-muted-foreground">ms</span></p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="h-4 w-4 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Avg Human Rating</p>
-            </div>
-            <p className="text-2xl font-bold">
-              {avgHumanScore !== null ? `${avgHumanScore}%` : '—'}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5">
+        <StatCard label="Total Sessions" value={sessions.length} />
+        <StatCard label="Completed" value={completedSessions.length} />
+        <StatCard label="Avg TTFB" value={avgLatency} unit="ms" />
+        <StatCard label="Avg Human Rating" value={avgHumanScore !== null ? `${avgHumanScore}%` : '—'} />
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-3 mb-4">
         <Select value={filterProvider} onValueChange={setFilterProvider}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Provider" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[160px] h-8 text-sm"><SelectValue placeholder="Provider" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Providers</SelectItem>
             {providers.map(p => (
@@ -163,11 +118,9 @@ export default function ResultsPage() {
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[130px] h-8 text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="aborted">Aborted</SelectItem>
@@ -175,70 +128,71 @@ export default function ResultsPage() {
         </Select>
       </div>
 
-      {/* Sessions table */}
+      {/* Table */}
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading results...</div>
+        <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-sm text-muted-foreground">
           {sessions.length === 0 ? (
             <div>
-              <p>No eval sessions yet.</p>
-              <Link href="/eval/live" className="text-primary underline text-sm mt-2 inline-block">
+              <p>No sessions yet.</p>
+              <Link href="/eval/live" className="text-primary underline text-xs mt-1 inline-block">
                 Start your first eval →
               </Link>
             </div>
-          ) : (
-            'No sessions match your filters.'
-          )}
+          ) : 'No matches.'}
         </div>
       ) : (
-        <div className="border rounded-lg">
+        <div className="border rounded">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Provider</TableHead>
-                <TableHead>Prompt</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-center">Turns</TableHead>
-                <TableHead className="text-center">Avg TTFB</TableHead>
-                <TableHead className="text-center">Human Score</TableHead>
-                <TableHead className="w-[80px]">Status</TableHead>
-                <TableHead className="w-[40px]"></TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-xs font-medium text-muted-foreground h-9">Provider</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9">Prompt</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9">Date</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9 text-right">Turns</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9 text-right">TTFB</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9 text-right">Human</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground h-9 w-[70px]">Status</TableHead>
+                <TableHead className="h-9 w-[32px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((session) => (
-                <TableRow key={session.id} className="cursor-pointer hover:bg-muted/50">
-                  <TableCell className="font-medium">{session.providerName}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
+                <TableRow key={session.id} className="group">
+                  <TableCell className="text-sm font-medium py-2">{session.providerName}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-[180px] truncate py-2">
                     {session.promptName}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground font-metric py-2">
                     {formatDate(session.startedAt)}
                   </TableCell>
-                  <TableCell className="text-center">{session.turnCount}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-sm font-metric text-right py-2">{session.turnCount}</TableCell>
+                  <TableCell className="text-sm font-metric text-right py-2">
                     {session.avgTtfbMs != null ? `${session.avgTtfbMs}ms` : '—'}
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-sm font-metric text-right py-2">
                     {session.humanScore != null ? (
-                      <span className={session.humanScore >= 70 ? 'text-green-600' : session.humanScore >= 40 ? 'text-yellow-600' : 'text-red-600'}>
+                      <span className={
+                        session.humanScore >= 70 ? 'text-green-400' :
+                        session.humanScore >= 40 ? 'text-yellow-400' : 'text-red-400'
+                      }>
                         {session.humanScore}%
                       </span>
                     ) : '—'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Badge variant={
-                      session.status === 'completed' ? 'default' :
-                      session.status === 'active' ? 'secondary' : 'destructive'
-                    } className="text-xs">
+                      session.status === 'completed' ? 'secondary' :
+                      session.status === 'active' ? 'default' : 'destructive'
+                    } className="text-[10px] font-metric">
                       {session.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Link href={`/results/${session.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <ChevronRight className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100">
+                        <ChevronRight className="h-3.5 w-3.5" />
                       </Button>
                     </Link>
                   </TableCell>
