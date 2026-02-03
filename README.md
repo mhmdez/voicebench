@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">🎙️ VoiceBench</h1>
   <p align="center">
-    Open-source voice AI evaluation platform — Chatbot Arena for speech-to-speech models
+    Open-source voice AI evaluation workbench for dev teams
   </p>
 </p>
 
@@ -16,7 +16,6 @@
 <p align="center">
   <a href="#-quick-start">Quick Start</a> •
   <a href="#-features">Features</a> •
-  <a href="#-screenshots">Screenshots</a> •
   <a href="#-architecture">Architecture</a> •
   <a href="#-providers">Providers</a> •
   <a href="#-contributing">Contributing</a>
@@ -26,12 +25,15 @@
 
 ## What is VoiceBench?
 
-**VoiceBench** is an open-source platform for blind A/B comparison of speech-to-speech AI models with Elo rankings and automated evaluation metrics. Think [Chatbot Arena](https://arena.lmsys.org/) meets [Hamming](https://www.hamming.ai/), but for voice.
+**VoiceBench** is an open-source evaluation workbench for teams building voice AI applications. Hook up your voice providers, run conversations against evaluation prompts, and get comprehensive metrics — both auto-detected and human-rated.
 
-- 🎯 **Arena Mode** — Blind comparisons with crowd-sourced voting
-- 📊 **Eval Framework** — Automated benchmarks with LLM judge scoring
-- 🏆 **Elo Leaderboard** — Statistical rankings with confidence intervals
-- 🔌 **Multi-Provider** — OpenAI, Google Gemini, Retell AI, ElevenLabs, and custom adapters
+Think of it as the missing dev tool between "it sounds okay" and "we have data."
+
+- 🎯 **Live Eval** — Start conversations with any provider, rate responses in real time
+- 📊 **Auto Metrics** — TTFB, latency, WER, speech rate, audio duration — measured automatically
+- 👤 **Human Ratings** — One-click thumbs up/down for naturalness, prosody, emotion, accuracy, helpfulness, efficiency, turn-taking, interruption handling
+- 📈 **Analytics** — Cross-session analysis by provider, prompt, and metric with CSV export
+- 🔌 **Multi-Provider** — OpenAI Realtime, Google Gemini, Retell AI, and custom adapters
 
 ## 🚀 Quick Start
 
@@ -44,129 +46,165 @@
 ### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/mhmdez/voicebench.git
 cd voicebench
 
-# Install dependencies
 npm install
 
-# Set up environment variables
 cp .env.example .env.local
+# Add your provider API keys to .env.local
 
-# Push database schema
 npm run db:push
 
-# Start development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to access VoiceBench.
+Open [http://localhost:3000](http://localhost:3000) — you'll land on the Live Eval page.
 
 ### Environment Variables
 
-Create a `.env.local` file:
-
 ```env
-# Required for provider testing and evaluations
+# Database (SQLite, local by default)
+DATABASE_URL=./data/voicebench.db
+
+# Provider keys (add via Settings UI or env)
 OPENAI_API_KEY=sk-...
-
-# Google Gemini (optional)
 GOOGLE_API_KEY=...
-
-# Retell AI (optional)
 RETELL_API_KEY=...
 
-# Judge model configuration (optional)
+# Judge model for automated scoring (optional)
 JUDGE_MODEL=gpt-4o
-JUDGE_API_KEY=sk-...  # Defaults to OPENAI_API_KEY
+JUDGE_API_KEY=sk-...
 
-# Whisper transcription (optional)
-WHISPER_API_KEY=sk-...  # Defaults to OPENAI_API_KEY
+# Whisper for transcription/WER (optional)
+WHISPER_API_KEY=sk-...
 ```
 
 ## ✨ Features
 
-### 🎯 Arena Mode
+### Live Eval
 
-Blind A/B comparisons of voice AI providers with crowd-sourced human preferences:
+The core workflow: pick a provider, pick a prompt (or freestyle), and start talking.
 
-1. **Select Category** — General, customer support, creative, multilingual, etc.
-2. **Listen Blind** — Hear two anonymous AI responses to the same prompt
-3. **Vote** — Pick the better response or call it a tie (keyboard shortcuts included)
-4. **Reveal** — Provider identity revealed, Elo ratings update in real time
+1. **Choose provider + prompt** — Select from configured providers and 75+ built-in evaluation scenarios
+2. **Converse** — Multi-turn conversation with the voice agent
+3. **Rate per turn** — Quick thumbs up/down on 8 quality dimensions
+4. **Watch metrics** — Auto-detected metrics update live with sparkline trends
+5. **End & save** — Session saved with full metrics for cross-session analysis
 
-### 📊 Evaluation Framework
+### Auto-Detected Metrics
 
-Run systematic benchmarks across multiple providers:
+Measured automatically during every conversation:
 
-- **LLM Judge Scoring** — AI-powered quality assessment across accuracy, helpfulness, naturalness, and efficiency
-- **WER Calculation** — Word Error Rate for transcription accuracy
-- **Latency Metrics** — Time-to-first-byte (TTFB) and total response time
-- **Export** — Download results as JSON or CSV
+| Metric | What it measures |
+|--------|-----------------|
+| **TTFB** | Time to first byte — how fast the agent starts responding |
+| **Response Time** | Total end-to-end latency |
+| **Word Count** | Response verbosity |
+| **Speech Rate** | Words per minute |
+| **WER** | Word Error Rate — transcription accuracy |
+| **Audio Duration** | Length of audio responses |
 
-### 🔌 Provider Adapters
+### Human Rating Metrics
 
-Extensible adapter architecture supporting:
+One-click per turn, per metric. Captures what only humans can judge:
 
-| Provider | Type | Pipeline |
-|----------|------|----------|
-| **OpenAI** | `openai` | Whisper → GPT-4o → TTS |
-| **Google Gemini** | `gemini` | Gemini multimodal → Cloud TTS |
-| **Retell AI** | `retell` | End-to-end voice agent API |
+| Metric | What it captures |
+|--------|-----------------|
+| **Naturalness** | Does it sound like a real person? |
+| **Prosody** | Rhythm, stress, intonation quality |
+| **Emotion** | Appropriate emotional expression |
+| **Accuracy** | Factual correctness of responses |
+| **Helpfulness** | Did it actually help with the task? |
+| **Efficiency** | Got to the point without rambling? |
+| **Turn-taking** | Natural conversation flow and timing |
+| **Interruption Handling** | Graceful handling of user interruptions |
+
+### Analytics Dashboard
+
+Results page with three analysis views:
+
+- **Overview** — Provider comparison (avg TTFB, human ratings) with horizontal bar charts
+- **By Prompt** — Which scenarios each provider handles best/worst
+- **By Metric** — Per-metric distribution across all sessions (positive/negative/neutral)
+
+Plus: CSV export, date range filtering, provider and status filters.
+
+### Prompts Library
+
+75+ built-in evaluation scenarios across categories:
+
+- **Task Completion** — Booking, ordering, scheduling
+- **Information Retrieval** — Questions, lookups, fact-checking
+- **Conversation Flow** — Multi-turn dialogue, context retention
+
+Create custom prompts or import from YAML.
+
+## 🔌 Providers
+
+Extensible adapter architecture:
+
+| Provider | Type | Status |
+|----------|------|--------|
+| **OpenAI Realtime** | `openai` | ✅ Built-in |
+| **Google Gemini** | `gemini` | ✅ Built-in |
+| **Retell AI** | `retell` | ✅ Built-in |
 | **ElevenLabs** | `elevenlabs` | Coming soon |
 | **Custom** | `custom` | Bring your own endpoint |
 
-### 🏆 Elo Leaderboard
+Add providers via the Settings UI or API:
 
-Live provider rankings with:
-- Elo rating system based on match outcomes
-- Category-specific rankings
-- Match count and win rate tracking
-- Statistical confidence indicators
+```bash
+curl -X POST http://localhost:3000/api/providers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "GPT-4o Realtime",
+    "type": "openai",
+    "config": { "apiKey": "sk-...", "model": "gpt-4o-realtime", "voiceId": "nova" }
+  }'
+```
 
-## 📸 Screenshots
+### Writing a Custom Adapter
 
-> *Screenshots coming soon — run the project locally to see it in action!*
+```typescript
+import { ProviderAdapter } from '@/lib/providers/base-adapter';
+import type { AudioPrompt, ProviderResponse } from '@/lib/providers/types';
 
-| Arena Mode | Leaderboard | Evaluation |
-|:---:|:---:|:---:|
-| ![Arena](docs/screenshots/arena.png) | ![Leaderboard](docs/screenshots/leaderboard.png) | ![Eval](docs/screenshots/eval.png) |
+export class MyAdapter extends ProviderAdapter {
+  async generateResponse(prompt: AudioPrompt): Promise<ProviderResponse> {
+    // Your voice provider logic here
+  }
+}
+```
 
 ## 🏗️ Architecture
 
 ```
 voicebench/
 ├── src/
-│   ├── app/              # Next.js App Router pages & API routes
-│   │   ├── api/          # REST API endpoints
-│   │   │   ├── arena/    # Match generation, voting, leaderboard
-│   │   │   ├── eval/     # Evaluation runs and exports
-│   │   │   ├── providers/# Provider CRUD
-│   │   │   └── scenarios/# Scenario import
-│   │   ├── arena/        # Arena comparison UI
-│   │   ├── eval/         # Evaluation dashboard
-│   │   ├── leaderboard/  # Public rankings
-│   │   └── settings/     # Provider configuration
-│   ├── components/       # React components (shadcn/ui based)
-│   │   ├── arena/        # MatchView, VoteButtons, RevealView
-│   │   ├── audio/        # AudioPlayer, Waveform
-│   │   ├── charts/       # ScoreRadar, MetricsBar, EloTrend
-│   │   └── ui/           # shadcn/ui primitives
-│   ├── db/               # Drizzle ORM schemas & migrations
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── eval/         # Sessions, turns, ratings, analytics
+│   │   │   ├── providers/    # Provider CRUD + health checks
+│   │   │   └── scenarios/    # Prompt management + YAML import
+│   │   ├── eval/
+│   │   │   ├── live/         # Live conversation + real-time metrics
+│   │   │   └── demo/         # Demo with sample data
+│   │   ├── results/          # Analytics dashboard + session detail
+│   │   ├── prompts/          # Scenario library management
+│   │   └── settings/         # Provider configuration
+│   ├── components/
+│   │   ├── layout/           # Sidebar navigation
+│   │   ├── settings/         # Provider form + list
+│   │   └── ui/               # shadcn/ui components
+│   ├── db/                   # Drizzle ORM schemas
 │   ├── lib/
-│   │   ├── providers/    # Provider adapter system
-│   │   │   ├── base-adapter.ts          # Abstract base class
-│   │   │   ├── openai-realtime-adapter.ts
-│   │   │   ├── gemini-adapter.ts
-│   │   │   └── retell-adapter.ts
-│   │   ├── eval/         # Evaluation engine, LLM judge, WER
-│   │   └── services/     # Matchmaking, Elo, Arena logic
-│   ├── stores/           # Zustand state management
-│   └── types/            # TypeScript interfaces
-├── data/                 # SQLite database files
-├── public/               # Static assets & audio files
-└── docs/                 # Documentation
+│   │   ├── providers/        # Adapter system (OpenAI, Gemini, Retell)
+│   │   ├── eval/             # WER calculator, metrics, judge
+│   │   └── services/         # Business logic
+│   └── types/                # TypeScript interfaces
+├── data/                     # SQLite database
+└── public/                   # Static assets
 ```
 
 ### Tech Stack
@@ -176,132 +214,33 @@ voicebench/
 | **Framework** | Next.js 16 (App Router, React 19) |
 | **Language** | TypeScript 5 |
 | **Database** | SQLite + Drizzle ORM |
-| **UI** | shadcn/ui, Radix UI, Tailwind CSS 4 |
-| **State** | Zustand + SWR |
+| **UI** | shadcn/ui, Tailwind CSS 4 |
+| **State** | Zustand |
 | **Validation** | Zod |
-| **Audio** | Web Audio API, custom waveform renderer |
-
-## 🔧 Configuration
-
-### Adding Providers
-
-Configure voice AI providers via the Settings UI or API:
-
-```bash
-# OpenAI
-curl -X POST http://localhost:3000/api/providers \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "GPT-4o Nova",
-    "type": "openai",
-    "config": { "apiKey": "sk-...", "model": "gpt-4o", "voiceId": "nova" }
-  }'
-
-# Gemini
-curl -X POST http://localhost:3000/api/providers \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Gemini Flash",
-    "type": "gemini",
-    "config": { "apiKey": "...", "model": "gemini-2.0-flash" }
-  }'
-
-# Retell AI
-curl -X POST http://localhost:3000/api/providers \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Retell Agent",
-    "type": "retell",
-    "config": { "apiKey": "...", "voiceId": "agent_xxx" }
-  }'
-```
-
-### Importing Scenarios
-
-Import evaluation scenarios from YAML:
-
-```bash
-curl -X POST http://localhost:3000/api/scenarios/import \
-  -H "Content-Type: application/json" \
-  -d '{
-    "yaml": "version: \"1.0\"\nscenarios:\n  - id: greeting-basic\n    name: Basic Greeting\n    type: task-completion\n    prompt: \"Hello, how are you today?\"\n    expected_outcome: \"A friendly greeting response\"",
-    "mode": "skip"
-  }'
-```
-
-### Writing a Custom Adapter
-
-Extend `ProviderAdapter` to add your own provider:
-
-```typescript
-import { ProviderAdapter } from '@/lib/providers/base-adapter';
-import type { AudioPrompt, ProviderResponse, ProviderHealthCheck } from '@/lib/providers/types';
-
-export class MyAdapter extends ProviderAdapter {
-  constructor(options: AdapterOptions) {
-    super('custom', options);
-  }
-
-  async generateResponse(prompt: AudioPrompt): Promise<ProviderResponse> {
-    // Your implementation here
-  }
-
-  async healthCheck(): Promise<ProviderHealthCheck> {
-    // Your implementation here
-  }
-
-  getName(): string {
-    return 'My Provider';
-  }
-}
-```
-
-Then register it:
-
-```typescript
-import { registerAdapter } from '@/lib/providers';
-registerAdapter('custom', MyAdapter);
-```
 
 ## 📜 Scripts
 
 ```bash
-npm run dev          # Start development server
+npm run dev          # Development server
 npm run build        # Production build
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run db:generate  # Generate Drizzle migrations
-npm run db:migrate   # Run migrations
-npm run db:push      # Push schema directly (dev)
+npm run db:push      # Push schema to DB
+npm run db:seed      # Seed sample data
 npm run db:studio    # Open Drizzle Studio
-npm run db:seed      # Seed demo data
 ```
-
-## 📖 Documentation
-
-- [Architecture](./docs/ARCHITECTURE.md) — System design and data flow
-- [Provider Guide](./docs/PROVIDERS.md) — Adding new provider adapters
-- [Scenario Schema](./docs/SCENARIOS.md) — YAML format reference
-- [API Reference](./docs/API.md) — Complete endpoint documentation
 
 ## 🤝 Contributing
 
-Contributions welcome! Here's how:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feat/amazing-feature`)
-5. Open a Pull Request
-
-Please ensure `npm run build` passes before submitting.
+1. Fork the repo
+2. Create a feature branch
+3. Make sure `npm run build` passes
+4. Open a PR
 
 ## 📄 License
 
-MIT License — see [LICENSE](./LICENSE) for details.
+MIT — see [LICENSE](./LICENSE) for details.
 
 ---
 
 <p align="center">
-  Built with ❤️ for the voice AI community
+  Built for teams shipping voice AI
 </p>

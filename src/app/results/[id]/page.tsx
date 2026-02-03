@@ -23,6 +23,7 @@ interface Turn {
   wordCount?: number | null;
   speechRateWpm?: number | null;
   audioDurationMs?: number | null;
+  werScore?: number | null;
   ratings: Record<string, number>;
 }
 
@@ -39,10 +40,14 @@ interface SessionDetail {
   turns: Turn[];
 }
 
-const RATING_METRICS = ['naturalness', 'prosody', 'accuracy', 'helpfulness', 'efficiency'] as const;
+const RATING_METRICS = [
+  'naturalness', 'prosody', 'accuracy', 'helpfulness', 'efficiency',
+  'emotion', 'turn_taking', 'interruption_handling',
+] as const;
 const METRIC_LABELS: Record<string, string> = {
   naturalness: 'Natural', prosody: 'Prosody', accuracy: 'Accurate',
   helpfulness: 'Helpful', efficiency: 'Efficient',
+  emotion: 'Emotion', turn_taking: 'Turn-taking', interruption_handling: 'Interruptions',
 };
 
 function StatCard({ label, value, unit }: { label: string; value: number | string; unit?: string }) {
@@ -92,6 +97,16 @@ export default function SessionDetailPage() {
   const avgTotal = avg(t => t.totalResponseMs ?? 0);
   const avgWords = avg(t => t.wordCount ?? 0);
   const avgWpm = avg(t => t.speechRateWpm ?? 0);
+
+  const werTurns = assistantTurns.filter(t => t.werScore != null);
+  const avgWer = werTurns.length > 0
+    ? Math.round(werTurns.reduce((s, t) => s + (t.werScore ?? 0), 0) / werTurns.length * 100) / 100
+    : null;
+
+  const durationTurns = assistantTurns.filter(t => t.audioDurationMs != null);
+  const avgDuration = durationTurns.length > 0
+    ? (durationTurns.reduce((s, t) => s + (t.audioDurationMs ?? 0), 0) / durationTurns.length / 1000).toFixed(1)
+    : null;
 
   const metricSummary = RATING_METRICS.map(metric => {
     const ratings = assistantTurns.map(t => t.ratings[metric]).filter(v => v !== undefined && v !== 0);
@@ -207,6 +222,8 @@ export default function SessionDetailPage() {
             <StatCard label="Avg Response" value={avgTotal} unit="ms" />
             <StatCard label="Avg Words" value={avgWords} />
             <StatCard label="Speech Rate" value={avgWpm} unit="wpm" />
+            <StatCard label="WER" value={avgWer !== null ? `${(avgWer * 100).toFixed(1)}%` : '—'} />
+            <StatCard label="Audio Duration" value={avgDuration !== null ? avgDuration : '—'} unit={avgDuration !== null ? 's' : undefined} />
           </div>
 
           {/* Human ratings */}

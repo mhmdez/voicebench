@@ -236,14 +236,14 @@ export default function PromptsPage() {
           {scenarios.length === 0 ? 'No prompts. Create one above.' : 'No matches.'}
         </div>
       ) : (
-        <div className="border rounded">
+        <div className="border rounded-md bg-card/50">
           <Table>
             <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="text-xs font-medium text-muted-foreground h-9">Name</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground h-9 w-[80px]">Type</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground h-9">Prompt</TableHead>
-                <TableHead className="text-xs font-medium text-muted-foreground h-9 w-[70px]">Diff</TableHead>
+              <TableRow className="hover:bg-transparent border-b border-border">
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-9">Name</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-9 w-[80px]">Type</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-9">Prompt</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-9 w-[70px]">Diff</TableHead>
                 <TableHead className="h-9 w-[40px]"></TableHead>
               </TableRow>
             </TableHeader>

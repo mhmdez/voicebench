@@ -39,24 +39,50 @@ interface Turn {
   wordCount?: number | null;
   speechRateWpm?: number | null;
   audioDurationMs?: number | null;
+  werScore?: number | null;
   ratings: Record<string, number>;
 }
 
-const RATING_METRICS = ['naturalness', 'prosody', 'accuracy', 'helpfulness', 'efficiency'] as const;
+const RATING_METRICS = [
+  'naturalness', 'prosody', 'accuracy', 'helpfulness', 'efficiency',
+  'emotion', 'turn_taking', 'interruption_handling',
+] as const;
 const METRIC_LABELS: Record<string, string> = {
   naturalness: 'Natural', prosody: 'Prosody', accuracy: 'Accurate',
   helpfulness: 'Helpful', efficiency: 'Efficient',
+  emotion: 'Emotion', turn_taking: 'Turn-taking', interruption_handling: 'Interruptions',
 };
+
+// ---------- SparkLine ----------
+
+function SparkLine({ data, color, height = 40 }: { data: number[]; color: string; height?: number }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const w = 100;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = height - ((v - min) / range) * (height - 4);
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <svg viewBox={`0 0 ${w} ${height}`} className="w-full" preserveAspectRatio="none">
+      <polyline fill="none" stroke={color} strokeWidth="1.5" points={points} />
+    </svg>
+  );
+}
 
 // ---------- Stat Card ----------
 
-function StatCard({ label, value, unit }: { label: string; value: number | string; unit?: string }) {
+function StatCard({ label, value, unit, accent }: { label: string; value: number | string; unit?: string; accent: string }) {
   return (
-    <div className="border rounded bg-card p-3">
-      <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
-      <p className="font-metric text-xl font-semibold leading-none">
+    <div className={`border border-l-2 ${accent} rounded-md bg-card p-3`}>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5">{label}</p>
+      <p className="font-metric text-2xl font-bold leading-none tracking-tight">
         {value}
-        {unit && <span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>}
+        {unit && <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>}
       </p>
     </div>
   );
@@ -204,6 +230,20 @@ export default function LiveEvalPage() {
   const avgTotal = avg(assistantTurns, t => t.totalResponseMs ?? 0);
   const avgWords = avg(assistantTurns, t => t.wordCount ?? 0);
   const avgWpm = avg(assistantTurns, t => t.speechRateWpm ?? 0);
+
+  const werTurns = assistantTurns.filter(t => t.werScore != null);
+  const avgWer = werTurns.length > 0
+    ? Math.round(werTurns.reduce((s, t) => s + (t.werScore ?? 0), 0) / werTurns.length * 100) / 100
+    : null;
+
+  const durationTurns = assistantTurns.filter(t => t.audioDurationMs != null);
+  const avgDuration = durationTurns.length > 0
+    ? (durationTurns.reduce((s, t) => s + (t.audioDurationMs ?? 0), 0) / durationTurns.length / 1000).toFixed(1)
+    : null;
+
+  const ttfbTrend = assistantTurns.map(t => t.ttfbMs ?? 0);
+  const responseTrend = assistantTurns.map(t => t.totalResponseMs ?? 0);
+  const wpmTrend = assistantTurns.map(t => t.speechRateWpm ?? 0);
 
   const allRatings = assistantTurns.flatMap(t =>
     RATING_METRICS.map(m => t.ratings[m]).filter(v => v !== undefined && v !== 0)
@@ -411,30 +451,57 @@ export default function LiveEvalPage() {
         {/* Right: Metrics panel */}
         <div className="space-y-4">
           {/* Stat grid */}
-          <div className="grid grid-cols-2 gap-2">
-            <StatCard label="Avg TTFB" value={avgTtfb} unit="ms" />
-            <StatCard label="Avg Response" value={avgTotal} unit="ms" />
-            <StatCard label="Avg Words" value={avgWords} />
-            <StatCard label="Speech Rate" value={avgWpm} unit="wpm" />
+          <div className="grid grid-cols-2 gap-2.5">
+            <StatCard label="Avg TTFB" value={avgTtfb} unit="ms" accent="border-l-emerald-500" />
+            <StatCard label="Avg Response" value={avgTotal} unit="ms" accent="border-l-blue-500" />
+            <StatCard label="Avg Words" value={avgWords} accent="border-l-orange-400" />
+            <StatCard label="Speech Rate" value={avgWpm} unit="wpm" accent="border-l-teal-400" />
+            <StatCard label="WER" value={avgWer !== null ? `${(avgWer * 100).toFixed(1)}%` : '—'} accent="border-l-violet-500" />
+            <StatCard label="Audio Duration" value={avgDuration !== null ? avgDuration : '—'} unit={avgDuration !== null ? 's' : undefined} accent="border-l-rose-500" />
           </div>
+
+          {/* Sparkline trends */}
+          {assistantTurns.length >= 2 && (
+            <div className="border rounded-md bg-card p-3">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-3">Trends</p>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] text-emerald-400 mb-1">TTFB</p>
+                  <SparkLine data={ttfbTrend} color="#34d399" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-blue-400 mb-1">Response Time</p>
+                  <SparkLine data={responseTrend} color="#60a5fa" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-teal-400 mb-1">Speech Rate</p>
+                  <SparkLine data={wpmTrend} color="#2dd4bf" />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Latency bars */}
           {assistantTurns.length > 0 && (
-            <div className="border rounded bg-card p-3">
+            <div className="border rounded-md bg-card p-3">
               <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-2.5">Latency per Turn</p>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {assistantTurns.map((t, i) => {
                   const maxTotal = Math.max(...assistantTurns.map(x => x.totalResponseMs ?? 0), 1);
+                  const total = t.totalResponseMs ?? 0;
+                  const pct = Math.min(100, (total / maxTotal) * 100);
+                  // Green for fast (<1s), orange for medium, red for slow (>3s)
+                  const barColor = total < 1000 ? 'bg-emerald-500' : total < 3000 ? 'bg-orange-400' : 'bg-red-400';
                   return (
                     <div key={t.id}>
                       <div className="flex justify-between text-[11px] mb-0.5">
                         <span className="font-metric text-muted-foreground">T{i + 1}</span>
-                        <span className="font-metric text-muted-foreground">{t.ttfbMs}ms / {t.totalResponseMs}ms</span>
+                        <span className="font-metric text-muted-foreground">{t.ttfbMs}ms / {total}ms</span>
                       </div>
-                      <div className="h-1.5 rounded-sm bg-muted overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                         <div
-                          className="h-full bg-chart-1 rounded-sm transition-all"
-                          style={{ width: `${Math.min(100, ((t.totalResponseMs ?? 0) / maxTotal) * 100)}%` }}
+                          className={`h-full ${barColor} rounded-full transition-all duration-500`}
+                          style={{ width: `${pct}%` }}
                         />
                       </div>
                     </div>
@@ -446,10 +513,12 @@ export default function LiveEvalPage() {
 
           {/* Human score */}
           {humanScore !== null && (
-            <div className="border rounded bg-card p-3 text-center">
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Human Rating</p>
-              <p className="font-metric text-2xl font-semibold">
-                {humanScore}%
+            <div className="border rounded-md bg-card p-3 text-center">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5">Human Rating</p>
+              <p className="font-metric text-3xl font-bold tracking-tight">
+                <span className={humanScore >= 70 ? 'text-emerald-400' : humanScore >= 40 ? 'text-orange-400' : 'text-red-400'}>
+                  {humanScore}%
+                </span>
               </p>
             </div>
           )}
@@ -465,6 +534,8 @@ export default function LiveEvalPage() {
                   ['Avg Response', `${avgTotal}ms`],
                   ['Avg Words', avgWords],
                   ['Speech Rate', `${avgWpm} wpm`],
+                  ...(avgWer !== null ? [['WER', `${(avgWer * 100).toFixed(1)}%`]] : []),
+                  ...(avgDuration !== null ? [['Avg Duration', `${avgDuration}s`]] : []),
                   ...(humanScore !== null ? [['Human Score', `${humanScore}%`]] : []),
                 ].map(([label, value]) => (
                   <div key={String(label)} className="flex justify-between">

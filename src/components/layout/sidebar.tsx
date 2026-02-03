@@ -30,8 +30,10 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-52 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
-        <Activity className="h-5 w-5 text-sidebar-primary" />
+      <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border px-4">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-chart-1/15">
+          <Activity className="h-4 w-4 text-chart-1" />
+        </div>
         <span className="text-sm font-semibold tracking-tight text-sidebar-primary">
           VoiceBench
         </span>
@@ -44,12 +46,15 @@ export function Sidebar() {
             key={item.href}
             href={item.href}
             className={cn(
-              'flex items-center gap-2.5 rounded px-2.5 py-1.5 text-[13px] font-medium transition-colors',
+              'relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors',
               isActive(item.href)
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                 : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
             )}
           >
+            {isActive(item.href) && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r-sm bg-chart-1" />
+            )}
             <item.icon className="h-4 w-4 shrink-0" />
             {item.label}
           </Link>
@@ -63,18 +68,21 @@ export function Sidebar() {
             key={item.href}
             href={item.href}
             className={cn(
-              'flex items-center gap-2.5 rounded px-2.5 py-1.5 text-[13px] font-medium transition-colors',
+              'relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors',
               isActive(item.href)
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                 : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
             )}
           >
+            {isActive(item.href) && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r-sm bg-chart-1" />
+            )}
             <item.icon className="h-4 w-4 shrink-0" />
             {item.label}
           </Link>
         ))}
-        <div className="px-2.5 pt-2 text-[11px] text-sidebar-foreground/40">
-          v0.2.0
+        <div className="px-2.5 pt-3 text-[10px] font-metric text-sidebar-foreground/30 tracking-wider">
+          v3.0.0
         </div>
       </div>
     </aside>
