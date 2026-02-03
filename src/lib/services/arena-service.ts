@@ -247,35 +247,50 @@ async function loadPromptAudio(audioUrl: string | null): Promise<Buffer | null> 
 }
 
 /**
- * Create a mock match for demo/testing purposes
+ * Create a mock match for demo/testing purposes.
+ * Pulls a random prompt from the database when available,
+ * falling back to hardcoded prompts only if the DB is empty.
  */
-function createMockMatch(category: Category): MockMatch {
+async function createMockMatch(category: Category): Promise<MockMatch> {
   const matchId = randomUUID();
-  const mockPrompts: Record<Category, string> = {
-    'general': 'Hello! How are you doing today?',
-    'customer-support': 'I need help with my order. It arrived damaged.',
-    'information-retrieval': 'What is the capital of France?',
-    'creative': 'Tell me a short story about a robot learning to paint.',
-    'multilingual': 'Can you greet me in Spanish, French, and Japanese?',
-  };
 
-  const promptText = mockPrompts[category];
-  
+  // Try to fetch a random prompt from the DB for this category
+  let promptId = `mock-prompt-${category}`;
+  let promptText = '';
+  let promptCategory: Category = category;
+
+  const dbPrompt = await selectRandomPrompt(category);
+  if (dbPrompt) {
+    promptId = dbPrompt.id;
+    promptText = dbPrompt.text;
+    promptCategory = dbPrompt.category as Category;
+  } else {
+    // Fallback prompts if DB is empty
+    const fallbackPrompts: Record<Category, string> = {
+      'general': 'Hello! How are you doing today?',
+      'customer-support': 'I need help with my order. It arrived damaged.',
+      'information-retrieval': 'What is the capital of France?',
+      'creative': 'Tell me a short story about a robot learning to paint.',
+      'multilingual': 'Can you greet me in Spanish, French, and Japanese?',
+    };
+    promptText = fallbackPrompts[category];
+  }
+
   return {
     matchId,
     prompt: {
-      id: `mock-prompt-${category}`,
+      id: promptId,
       text: promptText,
-      category,
+      category: promptCategory,
       audioUrl: null,
     },
     responseA: {
       url: '/audio/mock/demo-response-a.mp3',
-      latencyMs: 850,
+      latencyMs: 600 + Math.floor(Math.random() * 600),
     },
     responseB: {
       url: '/audio/mock/demo-response-b.mp3',
-      latencyMs: 920,
+      latencyMs: 600 + Math.floor(Math.random() * 600),
     },
     createdAt: new Date(),
     isMock: true,
@@ -312,7 +327,7 @@ export async function generateMatch(
       console.log('[Arena] No providers configured, returning mock match');
       return {
         success: true,
-        match: createMockMatch(category),
+        match: await createMockMatch(category),
       };
     }
 
