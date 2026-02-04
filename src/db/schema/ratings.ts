@@ -4,7 +4,7 @@
  * Drizzle schema definition for Elo ratings per provider per category.
  */
 
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import { providers } from './providers';
 
@@ -49,6 +49,8 @@ export const ratings = sqliteTable(
     index('ratings_provider_id_idx').on(table.providerId),
     /** Composite index for category lookups per provider */
     index('ratings_provider_category_idx').on(table.providerId, table.category),
+    /** Ensure one rating per provider+category */
+    uniqueIndex('ratings_provider_category_unique').on(table.providerId, table.category),
   ]
 );
 

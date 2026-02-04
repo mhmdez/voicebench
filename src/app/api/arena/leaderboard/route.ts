@@ -91,11 +91,12 @@ export async function GET(request: NextRequest) {
 
     if (category === 'overall') {
       // Aggregate ratings across all categories
+      const weightedElo = sql<number>`CASE WHEN SUM(${ratings.matchCount}) = 0 THEN AVG(${ratings.elo}) ELSE CAST(SUM(${ratings.elo} * ${ratings.matchCount}) / SUM(${ratings.matchCount}) AS INTEGER) END`;
       const results = await db
         .select({
           providerId: providers.id,
           providerName: providers.name,
-          avgElo: sql<number>`CAST(AVG(${ratings.elo}) AS INTEGER)`,
+          weightedElo,
           totalMatchCount: sql<number>`SUM(${ratings.matchCount})`,
           totalWinCount: sql<number>`SUM(${ratings.winCount})`,
           totalTieCount: sql<number>`SUM(${ratings.tieCount})`,
@@ -104,10 +105,10 @@ export async function GET(request: NextRequest) {
         .leftJoin(ratings, eq(providers.id, ratings.providerId))
         .where(eq(providers.isActive, true))
         .groupBy(providers.id, providers.name)
-        .orderBy(desc(sql`AVG(${ratings.elo})`));
+        .orderBy(desc(weightedElo));
 
       leaderboardData = results.map((row, index) => {
-        const elo = row.avgElo ?? 1500;
+        const elo = row.weightedElo ?? 1500;
         const matchCount = row.totalMatchCount ?? 0;
         const winCount = row.totalWinCount ?? 0;
         const tieCount = row.totalTieCount ?? 0;
