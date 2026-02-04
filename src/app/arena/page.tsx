@@ -62,6 +62,7 @@ export default function ArenaPage() {
       const isMock = !!(data as { isMock?: boolean }).isMock;
       const match: CurrentMatch = {
         id: data.matchId,
+        isMock,
         modelA: {
           id: isMock ? "mock-a" : data.matchId + "-a",
           name: isMock ? (data as { mockProviderA?: string }).mockProviderA ?? "Provider A" : "Provider A",
@@ -74,6 +75,7 @@ export default function ArenaPage() {
         },
         promptId: data.prompt.id,
         promptText: data.prompt.text,
+        promptAudioUrl: data.prompt.audioUrl ?? null,
         audioUrlA: data.responseA.url,
         audioUrlB: data.responseB.url,
       };

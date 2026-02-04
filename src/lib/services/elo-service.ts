@@ -71,12 +71,15 @@ export interface EloMatchResult {
  * @param category - Rating category
  * @returns Current rating (creates with DEFAULT_ELO if not exists)
  */
+type DbClient = typeof db;
+
 async function getOrCreateRating(
   providerId: number,
-  category: RatingCategory
+  category: RatingCategory,
+  dbClient: DbClient
 ): Promise<{ id: number; elo: number; matchCount: number; winCount: number; tieCount: number }> {
   // Try to find existing rating
-  const [existing] = await db
+  const [existing] = await dbClient
     .select({
       id: ratings.id,
       elo: ratings.elo,
@@ -97,7 +100,7 @@ async function getOrCreateRating(
   }
 
   // Create new rating with default values
-  const [newRating] = await db
+  const [newRating] = await dbClient
     .insert(ratings)
     .values({
       providerId,
@@ -107,6 +110,9 @@ async function getOrCreateRating(
       winCount: 0,
       tieCount: 0,
     })
+    .onConflictDoNothing({
+      target: [ratings.providerId, ratings.category],
+    })
     .returning({
       id: ratings.id,
       elo: ratings.elo,
@@ -115,14 +121,38 @@ async function getOrCreateRating(
       tieCount: ratings.tieCount,
     });
 
-  return newRating;
+  if (newRating) {
+    return newRating;
+  }
+
+  const [fallback] = await dbClient
+    .select({
+      id: ratings.id,
+      elo: ratings.elo,
+      matchCount: ratings.matchCount,
+      winCount: ratings.winCount,
+      tieCount: ratings.tieCount,
+    })
+    .from(ratings)
+    .where(
+      and(
+        eq(ratings.providerId, providerId),
+        eq(ratings.category, category)
+      )
+    );
+
+  if (!fallback) {
+    throw new Error('Failed to create or fetch rating record');
+  }
+
+  return fallback;
 }
 
 /**
  * Get provider name by ID
  */
-async function getProviderName(providerId: number): Promise<string> {
-  const [provider] = await db
+async function getProviderName(providerId: number, dbClient: DbClient): Promise<string> {
+  const [provider] = await dbClient
     .select({ name: providers.name })
     .from(providers)
     .where(eq(providers.id, providerId));
@@ -137,9 +167,10 @@ async function updateRating(
   ratingId: number,
   newElo: number,
   isWin: boolean,
-  isTie: boolean
+  isTie: boolean,
+  dbClient: DbClient
 ): Promise<void> {
-  await db
+  await dbClient
     .update(ratings)
     .set({
       elo: newElo,
@@ -164,7 +195,8 @@ export async function updateEloRatings(
   providerAId: string,
   providerBId: string,
   winner: 'A' | 'B' | 'tie',
-  category: RatingCategory
+  category: RatingCategory,
+  dbClient: DbClient = db
 ): Promise<EloMatchResult> {
   // Parse provider IDs to integers
   const providerAIdNum = parseInt(providerAId, 10);
@@ -172,10 +204,10 @@ export async function updateEloRatings(
 
   // Get or create ratings for both providers
   const [ratingA, ratingB, nameA, nameB] = await Promise.all([
-    getOrCreateRating(providerAIdNum, category),
-    getOrCreateRating(providerBIdNum, category),
-    getProviderName(providerAIdNum),
-    getProviderName(providerBIdNum),
+    getOrCreateRating(providerAIdNum, category, dbClient),
+    getOrCreateRating(providerBIdNum, category, dbClient),
+    getProviderName(providerAIdNum, dbClient),
+    getProviderName(providerBIdNum, dbClient),
   ]);
 
   // Calculate expected scores
@@ -213,8 +245,8 @@ export async function updateEloRatings(
 
   // Update ratings in database
   await Promise.all([
-    updateRating(ratingA.id, newEloA, isWinA, isTie),
-    updateRating(ratingB.id, newEloB, isWinB, isTie),
+    updateRating(ratingA.id, newEloA, isWinA, isTie, dbClient),
+    updateRating(ratingB.id, newEloB, isWinB, isTie, dbClient),
   ]);
 
   return {

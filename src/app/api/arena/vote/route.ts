@@ -53,6 +53,19 @@ interface VoteResponse {
   category: RatingCategory;
 }
 
+class VoteError extends Error {
+  status: number;
+  code: ErrorResponse['code'];
+  details?: string;
+
+  constructor(status: number, message: string, code: ErrorResponse['code'], details?: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
 /** Error response */
 interface ErrorResponse {
   error: string;
@@ -201,96 +214,86 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch the match
-    const [match] = await db
-      .select()
-      .from(matches)
-      .where(eq(matches.id, body.matchId));
-
-    if (!match) {
-      return NextResponse.json(
-        {
-          error: 'Match not found',
-          code: 'MATCH_NOT_FOUND',
-          details: `No match with ID: ${body.matchId}`,
-        } satisfies ErrorResponse,
-        { status: 404 }
-      );
-    }
-
-    // Check if match has already been voted on
-    if (match.status === 'completed' || match.votedAt) {
-      return NextResponse.json(
-        {
-          error: 'Match has already been voted on',
-          code: 'ALREADY_VOTED',
-          details: `Match ${body.matchId} was voted on at ${match.votedAt?.toISOString()}`,
-        } satisfies ErrorResponse,
-        { status: 409 }
-      );
-    }
-
-    // Check if match has expired
-    if (match.status === 'expired') {
-      return NextResponse.json(
-        {
-          error: 'Match has expired',
-          code: 'MATCH_EXPIRED',
-        } satisfies ErrorResponse,
-        { status: 410 }
-      );
-    }
-
-    // Check for duplicate vote from this session on this match
-    const [existingVote] = await db
-      .select({ id: votes.id })
-      .from(votes)
-      .where(
-        and(
-          eq(votes.matchId, body.matchId),
-          eq(votes.sessionId, sessionId)
-        )
-      );
-
-    if (existingVote) {
-      return NextResponse.json(
-        {
-          error: 'You have already voted on this match',
-          code: 'DUPLICATE_VOTE',
-        } satisfies ErrorResponse,
-        { status: 409 }
-      );
-    }
-
-    // Generate vote ID
     const voteId = randomUUID();
     const now = new Date();
 
-    // Update Elo ratings
-    const eloResult = await updateEloRatings(
-      match.providerAId,
-      match.providerBId,
-      body.winner,
-      match.category as RatingCategory
-    );
+    const { match, eloResult } = await db.transaction(async (tx) => {
+      const [match] = await tx
+        .select()
+        .from(matches)
+        .where(eq(matches.id, body.matchId));
 
-    // Record the vote
-    await db.insert(votes).values({
-      id: voteId,
-      matchId: body.matchId,
-      winner: body.winner,
-      sessionId,
-      createdAt: now,
+      if (!match) {
+        throw new VoteError(
+          404,
+          'Match not found',
+          'MATCH_NOT_FOUND',
+          `No match with ID: ${body.matchId}`
+        );
+      }
+
+      if (match.status === 'expired') {
+        throw new VoteError(410, 'Match has expired', 'MATCH_EXPIRED');
+      }
+
+      if (match.status === 'completed' || match.votedAt) {
+        throw new VoteError(
+          409,
+          'Match has already been voted on',
+          'ALREADY_VOTED',
+          `Match ${body.matchId} was voted on at ${match.votedAt?.toISOString()}`
+        );
+      }
+
+      const [existingVote] = await tx
+        .select({ id: votes.id })
+        .from(votes)
+        .where(
+          and(
+            eq(votes.matchId, body.matchId),
+            eq(votes.sessionId, sessionId)
+          )
+        );
+
+      if (existingVote) {
+        throw new VoteError(409, 'You have already voted on this match', 'DUPLICATE_VOTE');
+      }
+
+      const updateResult = await tx
+        .update(matches)
+        .set({
+          status: 'completed',
+          votedAt: now,
+        })
+        .where(
+          and(
+            eq(matches.id, body.matchId),
+            eq(matches.status, 'pending')
+          )
+        );
+
+      if (updateResult.changes === 0) {
+        throw new VoteError(409, 'Match has already been voted on', 'ALREADY_VOTED');
+      }
+
+      const eloResult = await updateEloRatings(
+        match.providerAId,
+        match.providerBId,
+        body.winner,
+        match.category as RatingCategory,
+        tx as typeof db
+      );
+
+      await tx.insert(votes).values({
+        id: voteId,
+        matchId: body.matchId,
+        winner: body.winner,
+        sessionId,
+        createdAt: now,
+      });
+
+      return { match, eloResult };
     });
-
-    // Update match status
-    await db
-      .update(matches)
-      .set({
-        status: 'completed',
-        votedAt: now,
-      })
-      .where(eq(matches.id, body.matchId));
 
     // Return success response
     const response: VoteResponse = {
@@ -319,6 +322,16 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof VoteError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: error.code,
+          details: error.details,
+        } satisfies ErrorResponse,
+        { status: error.status }
+      );
+    }
     console.error('Vote API error:', error);
     return NextResponse.json(
       {

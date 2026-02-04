@@ -25,10 +25,12 @@ export interface CurrentMatch {
   modelB: Model;
   promptId: string;
   promptText: string;
+  promptAudioUrl?: string | null;
   responseA?: string;
   responseB?: string;
   audioUrlA?: string;
   audioUrlB?: string;
+  isMock?: boolean;
 }
 
 export interface ArenaState {

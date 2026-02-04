@@ -48,10 +48,18 @@ export function MatchView({ onVoteSubmit, onGenerateMatch, className }: MatchVie
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSubmittingVote, setIsSubmittingVote] = useState(false)
   const [voteResult, setVoteResult] = useState<ArenaVoteResult | null>(null)
+  const isMockMatch = currentMatch?.isMock ?? false
+  const hasPromptAudio = !!currentMatch?.promptAudioUrl
 
   const canVote = useMemo(
-    () => playedA && playedB && !voteResult && votingState !== "revealed" && !isSubmittingVote,
-    [playedA, playedB, voteResult, votingState, isSubmittingVote]
+    () =>
+      playedA &&
+      playedB &&
+      !voteResult &&
+      votingState !== "revealed" &&
+      !isSubmittingVote &&
+      !isMockMatch,
+    [playedA, playedB, voteResult, votingState, isSubmittingVote, isMockMatch]
   )
 
   // Reset per-match state
@@ -87,7 +95,12 @@ export function MatchView({ onVoteSubmit, onGenerateMatch, className }: MatchVie
 
   const handleVote = useCallback(
     async (winner: ArenaVoteWinner) => {
-      if (!currentMatch || !canVote) return
+      if (!currentMatch || !canVote) {
+        if (isMockMatch) {
+          toast.error("Demo matches can't be voted on.")
+        }
+        return
+      }
 
       setIsSubmittingVote(true)
       const toastId = toast.loading("Submitting vote...")
@@ -136,7 +149,7 @@ export function MatchView({ onVoteSubmit, onGenerateMatch, className }: MatchVie
         setIsSubmittingVote(false)
       }
     },
-    [canVote, currentMatch, onVoteSubmit, setVotingState, submitVote]
+    [canVote, currentMatch, isMockMatch, onVoteSubmit, setVotingState, submitVote]
   )
 
   if (isLoading || isGenerating) {
@@ -194,10 +207,15 @@ export function MatchView({ onVoteSubmit, onGenerateMatch, className }: MatchVie
   return (
     <div className={cn("w-full space-y-6", className)}>
       <PromptPlayer
-        audioSrc={undefined}
+        audioSrc={currentMatch.promptAudioUrl ?? undefined}
         promptText={currentMatch.promptText}
         showTextToggle={!!currentMatch.promptText}
       />
+      {!hasPromptAudio && (
+        <p className="text-xs text-muted-foreground">
+          Prompt audio is unavailable for this match.
+        </p>
+      )}
 
       <div className="text-center">
         {!playedA && !playedB && (
@@ -209,7 +227,7 @@ export function MatchView({ onVoteSubmit, onGenerateMatch, className }: MatchVie
         {!playedA && playedB && (
           <p className="text-sm text-muted-foreground">Now listen to Response A</p>
         )}
-        {playedA && playedB && !voteResult && (
+        {playedA && playedB && !voteResult && !isMockMatch && (
           <p className="text-sm text-muted-foreground">Vote below (or use the arrow keys)</p>
         )}
       </div>
@@ -230,6 +248,12 @@ export function MatchView({ onVoteSubmit, onGenerateMatch, className }: MatchVie
           revealedProvider={voteResult ? voteResult.providerB.name : undefined}
         />
       </div>
+
+      {isMockMatch && (
+        <p className="text-sm text-muted-foreground text-center">
+          Demo match — voting is disabled until providers are configured.
+        </p>
+      )}
 
       {voteResult ? (
         <RevealView match={currentMatch} result={voteResult} onPlayAnother={handleGenerateMatch} />
