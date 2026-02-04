@@ -113,6 +113,21 @@ function weightedRandomSelect(
 }
 
 /**
+ * Select a single provider excluding a set of IDs.
+ */
+export async function selectReplacementProvider(
+  category: Category,
+  excludeIds: number[]
+): Promise<Provider | null> {
+  const providersWithCount = await getActiveProvidersWithMatchCount(category);
+  const available = providersWithCount.filter(
+    (entry) => !excludeIds.includes(entry.provider.id)
+  );
+  const selected = weightedRandomSelect(available);
+  return selected?.provider ?? null;
+}
+
+/**
  * Select two different providers for a match
  *
  * Uses weighted random selection to favor providers with fewer matches,

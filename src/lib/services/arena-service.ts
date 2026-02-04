@@ -12,7 +12,11 @@ import path from 'path';
 import { db, matches, prompts } from '@/db';
 import type { Category } from '@/types/prompt';
 import type { Provider } from '@/types/provider';
-import { selectProviders, getActiveProviderCount } from './matchmaking';
+import {
+  selectProviders,
+  getActiveProviderCount,
+  selectReplacementProvider,
+} from './matchmaking';
 import { getProviderRaw } from './provider-service';
 import { createAdapter, ProviderError } from '@/lib/providers';
 import type { ProviderResponse } from '@/lib/providers/types';
@@ -188,6 +192,47 @@ async function callProvider(
       error: error instanceof Error ? error.message : 'Unknown error',
       latencyMs,
     };
+  }
+}
+
+async function tryReplaceFailedProvider(options: {
+  category: Category;
+  failedProvider: Provider;
+  otherProvider: Provider;
+  promptText: string;
+  promptAudioBuffer: Buffer | null;
+  timeoutMs: number;
+}): Promise<{ provider: Provider; result: ProviderCallResult } | null> {
+  const excludedIds = new Set<number>([
+    options.failedProvider.id,
+    options.otherProvider.id,
+  ]);
+
+  while (true) {
+    const replacement = await selectReplacementProvider(
+      options.category,
+      Array.from(excludedIds)
+    );
+    if (!replacement) {
+      return null;
+    }
+
+    excludedIds.add(replacement.id);
+    const replacementRaw = await getProviderRaw(replacement.id);
+    if (!replacementRaw) {
+      continue;
+    }
+
+    const replacementResult = await callProvider(
+      replacementRaw,
+      options.promptText,
+      options.promptAudioBuffer,
+      options.timeoutMs
+    );
+
+    if (replacementResult.success && replacementResult.response) {
+      return { provider: replacementRaw, result: replacementResult };
+    }
   }
 }
 
@@ -403,44 +448,102 @@ export async function generateMatch(
       };
     }
 
-    // If one provider failed, we could still return the match with a forfeit
-    // For now, we require both to succeed
-    if (!resultA.success || !resultA.response) {
-      return {
-        success: false,
-        error: {
-          error: `Provider ${providerARaw.name} failed`,
-          code: 'PROVIDER_FAILURE',
-          details: resultA.error,
-        },
-      };
+    let providerA = providerARaw;
+    let providerB = providerBRaw;
+    let finalResultA = resultA;
+    let finalResultB = resultB;
+
+    const providerAFailed = !resultA.success || !resultA.response;
+    const providerBFailed = !resultB.success || !resultB.response;
+
+    if (providerAFailed) {
+      const replacement = await tryReplaceFailedProvider({
+        category,
+        failedProvider: providerARaw,
+        otherProvider: providerBRaw,
+        promptText: prompt.text,
+        promptAudioBuffer,
+        timeoutMs,
+      });
+
+      if (!replacement) {
+        return {
+          success: false,
+          error: {
+            error: `Provider ${providerARaw.name} failed`,
+            code: 'PROVIDER_FAILURE',
+            details: resultA.error,
+          },
+        };
+      }
+
+      providerA = replacement.provider;
+      finalResultA = replacement.result;
     }
 
-    if (!resultB.success || !resultB.response) {
+    if (providerBFailed) {
+      const replacement = await tryReplaceFailedProvider({
+        category,
+        failedProvider: providerBRaw,
+        otherProvider: providerA,
+        promptText: prompt.text,
+        promptAudioBuffer,
+        timeoutMs,
+      });
+
+      if (!replacement) {
+        return {
+          success: false,
+          error: {
+            error: `Provider ${providerBRaw.name} failed`,
+            code: 'PROVIDER_FAILURE',
+            details: resultB.error,
+          },
+        };
+      }
+
+      providerB = replacement.provider;
+      finalResultB = replacement.result;
+    }
+
+    if (!finalResultA.response || !finalResultB.response) {
       return {
         success: false,
         error: {
-          error: `Provider ${providerBRaw.name} failed`,
+          error: 'Provider response missing after re-pairing',
           code: 'PROVIDER_FAILURE',
-          details: resultB.error,
         },
       };
     }
 
     // Save audio files
     const [audioUrlA, audioUrlB] = await Promise.all([
-      saveAudioFile(resultA.response.audioBuffer, resultA.response.mimeType, matchId, 'a'),
-      saveAudioFile(resultB.response.audioBuffer, resultB.response.mimeType, matchId, 'b'),
+      saveAudioFile(
+        finalResultA.response.audioBuffer,
+        finalResultA.response.mimeType,
+        matchId,
+        'a'
+      ),
+      saveAudioFile(
+        finalResultB.response.audioBuffer,
+        finalResultB.response.mimeType,
+        matchId,
+        'b'
+      ),
     ]);
 
     // Randomize A/B assignment (50% chance to swap)
     const shouldSwap = Math.random() < 0.5;
-    const finalProviderAId = shouldSwap ? providerBRaw.id : providerARaw.id;
-    const finalProviderBId = shouldSwap ? providerARaw.id : providerBRaw.id;
+    const finalProviderAId = shouldSwap ? providerB.id : providerA.id;
+    const finalProviderBId = shouldSwap ? providerA.id : providerB.id;
     const finalResponseAUrl = shouldSwap ? audioUrlB : audioUrlA;
     const finalResponseBUrl = shouldSwap ? audioUrlA : audioUrlB;
-    const finalLatencyA = shouldSwap ? resultB.latencyMs : resultA.latencyMs;
-    const finalLatencyB = shouldSwap ? resultA.latencyMs : resultB.latencyMs;
+    const finalLatencyA = shouldSwap
+      ? finalResultB.latencyMs
+      : finalResultA.latencyMs;
+    const finalLatencyB = shouldSwap
+      ? finalResultA.latencyMs
+      : finalResultB.latencyMs;
 
     // Create match record in database
     const now = new Date();
