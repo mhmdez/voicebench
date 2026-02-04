@@ -421,23 +421,24 @@ export async function generateMatch(
 
     const failedProviderIds = new Set<number>();
 
-    let resultA = providerARaw
-      ? await callProvider(providerARaw, prompt.text, promptAudioBuffer, timeoutMs)
-      : {
-          success: false,
-          providerId: selectedProviders.providerA.id,
-          error: 'Provider data not found',
-          latencyMs: 0,
-        };
-
-    let resultB = providerBRaw
-      ? await callProvider(providerBRaw, prompt.text, promptAudioBuffer, timeoutMs)
-      : {
-          success: false,
-          providerId: selectedProviders.providerB.id,
-          error: 'Provider data not found',
-          latencyMs: 0,
-        };
+    const [resultA, resultB] = await Promise.all([
+      providerARaw
+        ? callProvider(providerARaw, prompt.text, promptAudioBuffer, timeoutMs)
+        : Promise.resolve({
+            success: false,
+            providerId: selectedProviders.providerA.id,
+            error: 'Provider data not found',
+            latencyMs: 0,
+          }),
+      providerBRaw
+        ? callProvider(providerBRaw, prompt.text, promptAudioBuffer, timeoutMs)
+        : Promise.resolve({
+            success: false,
+            providerId: selectedProviders.providerB.id,
+            error: 'Provider data not found',
+            latencyMs: 0,
+          }),
+    ]);
 
     // Check for failures
     if (!resultA.success && !resultB.success) {
