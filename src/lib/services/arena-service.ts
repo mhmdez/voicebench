@@ -451,9 +451,10 @@ export async function generateMatch(
 
     // If one provider failed, attempt to re-pair with another provider.
     while (!resultA.success || !resultA.response || !resultB.success || !resultB.response) {
-      const failedResult = resultA.success ? resultB : resultA;
-      const successfulResult = resultA.success ? resultA : resultB;
-      const successfulProvider = resultA.success ? providerARaw : providerBRaw;
+      const resultAOk = resultA.success && !!resultA.response;
+      const failedResult = resultAOk ? resultB : resultA;
+      const successfulResult = resultAOk ? resultA : resultB;
+      const successfulProvider = resultAOk ? providerARaw : providerBRaw;
 
       if (!successfulProvider || !successfulResult.response) {
         return {
@@ -501,7 +502,7 @@ export async function generateMatch(
         continue;
       }
 
-      if (resultA.success) {
+      if (resultAOk) {
         providerBRaw = replacementRaw;
         resultB = replacementResult;
       } else {
@@ -516,6 +517,29 @@ export async function generateMatch(
         error: {
           error: 'Provider data not found',
           code: 'INTERNAL_ERROR',
+        },
+      };
+    }
+    // If one provider failed, we could still return the match with a forfeit
+    // For now, we require both to succeed
+    if (!resultA.success || !resultA.response) {
+      return {
+        success: false,
+        error: {
+          error: `Provider ${providerARaw.name} failed`,
+          code: 'PROVIDER_FAILURE',
+          details: resultA.error,
+        },
+      };
+    }
+
+    if (!resultB.success || !resultB.response) {
+      return {
+        success: false,
+        error: {
+          error: `Provider ${providerBRaw.name} failed`,
+          code: 'PROVIDER_FAILURE',
+          details: resultB.error,
         },
       };
     }
